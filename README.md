@@ -1,5 +1,9 @@
 # IRON NEBULA
 
+Xbox and native PS5 DualSense support: see [Controller support](CONTROLLER_SUPPORT.md)
+for controls, adaptive triggers, USB haptics, and validation status. Bluetooth HD
+haptics is an experimental option and is **disabled by default**.
+
 **Alpha 0.9.11.2 — Direct Mouse Flight** · Windows desktop · C# / .NET 8 / MonoGame WindowsDX
 
 A saját fejlesztésű, vízszintesen scrollozó sci-fi shoot ’em up játék. Három szektor, öt váltható és fejleszthető primary weapon, minibossok és főbossok, szektorvégi shop, mentés/Continue, billentyűzet-, egér- és Xbox-kompatibilis kontrollerkezelés.

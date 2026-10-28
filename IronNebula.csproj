@@ -13,6 +13,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.6" />
+    <PackageReference Include="HidSharp" Version="2.1.0" />
+    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+    <Compile Remove="Tools\**\*.cs" />
     <Content Include="Assets\**\*.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\**\*.jpg" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Audio\*.mp3" CopyToOutputDirectory="PreserveNewest" />

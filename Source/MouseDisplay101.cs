@@ -51,7 +51,7 @@ public sealed partial class IronNebulaGame
 
     private bool MovePilotDirectlyWithMouse(Vector2 keyboardOrPad, float dt)
     {
-        if(keyboardOrPad.LengthSquared()>.015f)
+        if(keyboardOrPad.LengthSquared()>.0001f)
         {
             // Any WASD/arrow/controller movement takes priority. A subsequent
             // mouse move switches straight back to pointer-based flight.
@@ -79,7 +79,7 @@ public sealed partial class IronNebulaGame
 
     private bool HandleTitleMouseInput()
     {
-        if(!_mouseValid) return false;
+        if(!_mouseValid || (!_mouseMoved && !_mouseClick)) return false;
         for(int i=0;i<5;i++)
         {
             Rectangle r=new(110,375+i*124,827,111);
@@ -93,7 +93,7 @@ public sealed partial class IronNebulaGame
     }
     private bool HandlePauseMouseInput()
     {
-        if(!_mouseValid) return false;
+        if(!_mouseValid || (!_mouseMoved && !_mouseClick)) return false;
         for(int i=0;i<4;i++)
         {
             Rectangle r=new(486,365+i*129,950,115);
@@ -165,8 +165,16 @@ public sealed partial class IronNebulaGame
             return true;
         }
         if(!_settingsOpen) return false;
-        if(MouseHit(new Rectangle(103,239,828,85))) { _settingsTab=0;return true; }
-        if(MouseHit(new Rectangle(971,239,828,85))) { _settingsTab=1;return true; }
+        if(MouseHit(new Rectangle(103,239,548,85))) { _settingsTab=0;return true; }
+        if(MouseHit(new Rectangle(677,239,548,85))) { _settingsTab=1;return true; }
+        if(MouseHit(new Rectangle(1251,239,548,85))) { _settingsTab=2;return true; }
+        if(_settingsTab==2)
+        {
+            for(int i=0;i<4;i++)
+                if(MouseHit(new Rectangle(103,410+i*124,1696,112)))
+                { _controllerSelection=i;ChangeControllerSetting(i,1);return true; }
+            return false;
+        }
         if(_settingsTab==1)
         {
             int first=(_controlsSelection/8)*8;

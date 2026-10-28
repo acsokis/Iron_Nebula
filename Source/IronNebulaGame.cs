@@ -157,7 +157,7 @@ public sealed partial class IronNebulaGame : Game
         IsFixedTimeStep=true;
         TargetElapsedTime=TimeSpan.FromSeconds(1.0/60.0);
         IsMouseVisible=true;
-        Window.Title="IRON NEBULA  |  ALPHA 0.9.11.2 - DIRECT MOUSE FLIGHT";
+        Window.Title="IRON NEBULA  |  ALPHA 0.9.11.2 - XBOX / DUALSENSE";
         Window.AllowUserResizing=true;
     }
 
@@ -509,7 +509,19 @@ public sealed partial class IronNebulaGame : Game
         _audio?.Tick(dt);
         SampleMouseInput();
         KeyboardState keys=Keyboard.GetState();
-        _pad=GamePad.GetState(PlayerIndex.One);
+        SampleGamePadInput(dt);
+        UpdateGamePadFeedback(dt);
+        if(!IsActive)
+        {
+            if(_mode==GameMode.Playing) { _mode=GameMode.Paused;_pauseMenuSelection=0; }
+            _beamActive=false;
+            _beamDamageTimer=0f;
+            _audio?.Beam(false);
+            _previousKeys=keys;
+            _previousPad=_pad;
+            base.Update(gameTime);
+            return;
+        }
         if(!_bindingCapture && !_difficultyPromptOpen && (KeyPressed(keys,Keys.F1)||PadPressed(Buttons.Back)))
         { _helpOpen=!_helpOpen;_settingsOpen=false;_bindingCapture=false;_audio?.Beam(false); }
         if(!_bindingCapture && !_difficultyPromptOpen && (KeyPressed(keys,Keys.F12) || KeyPressed(keys,Keys.O) || PadPressed(Buttons.Y)))
@@ -540,8 +552,9 @@ public sealed partial class IronNebulaGame : Game
             else if(_settingsOpen)
             {
                 if(!_bindingCapture && (KeyPressed(keys,Keys.Tab)||PadPressed(Buttons.RightShoulder)))
-                { _settingsTab=1-_settingsTab;_bindingNotice=""; }
+                { _settingsTab=(_settingsTab+1)%3;_bindingNotice=""; }
                 else if(_settingsTab==1) UpdateControlsMenu(keys);
+                else if(_settingsTab==2) UpdateControllerSettings(keys);
                 else UpdateAudioSettings(keys);
             }
             _previousKeys=keys;
@@ -607,7 +620,7 @@ public sealed partial class IronNebulaGame : Game
             UpdateScheduledDeathBursts(dt);
             UpdateShockwaves(dt);
             if(KeyPressed(keys,Keys.R)||MenuConfirm(keys)||MouseHit(new Rectangle(535,709,850,94))) OpenNewGameDifficulty();
-            else if(_mode==GameMode.GameOver && KeyPressed(keys,Keys.C) && _checkpointUnlocked) ResumeAtCheckpoint();
+            else if(_mode==GameMode.GameOver && (KeyPressed(keys,Keys.C)||PadPressed(Buttons.X)) && _checkpointUnlocked) ResumeAtCheckpoint();
             if(MenuBack(keys)) { _titleMenuSelection=0;_mode=GameMode.Title; }
         }
         else if(_mode==GameMode.Shop)
@@ -689,13 +702,18 @@ public sealed partial class IronNebulaGame : Game
         _enemyShotGlow=Math.Clamp(v.EnemyShotGlow,0,100);
         _hitEffectStrength=Math.Clamp(v.HitEffectStrength,0,100);
         _msaaRequest=Math.Clamp(v.Antialiasing,0,3);
+        _controllerHaptics=v.ControllerHaptics;
+        _adaptiveTriggers=v.AdaptiveTriggers;
+        _controllerStrength=Math.Clamp(v.ControllerStrength,0,100);
+        _bluetoothHaptics=v.BluetoothHaptics;
         ApplyDisplayConfiguration();
     }
 
     private void SaveGuiPreferences()
         =>GuiPreferences.Write(new GuiPreferences.Settings(_vsyncEnabled,_dofEnabled,
             _combatFxEnabled,_enemyReadabilityEnabled,_primaryVfxEnabled,_fullscreen,(int)_selectedDifficulty,
-            _resolutionIndex,_enemyShotGlow,_hitEffectStrength,_msaaRequest));
+            _resolutionIndex,_enemyShotGlow,_hitEffectStrength,_msaaRequest,
+            _controllerHaptics,_adaptiveTriggers,_controllerStrength,_bluetoothHaptics));
 
     private static int ShopTabOf(int item)=>item switch
     {
@@ -1100,7 +1118,7 @@ private void DrawShop()
         {
             // Keyboard and controller retain their normal inertia and speed upgrades.
             float speed=(_precisionFire?260f:550f)*(1f+.08f*_pilot.EngineLevel);
-            float blend=Math.Min(1f,dt*(direction==Vector2.Zero?17f:10f));
+            float blend=1f-MathF.Exp(-dt*(direction==Vector2.Zero?14f:9f));
             _pilot.Velocity=Vector2.Lerp(_pilot.Velocity,direction*speed,blend);
             _pilot.Position+=_pilot.Velocity*dt;
             _pilot.Position=new Vector2(MathHelper.Clamp(_pilot.Position.X,105,ViewWidth-145),MathHelper.Clamp(_pilot.Position.Y,110,ViewHeight-115));
@@ -1218,6 +1236,8 @@ private void DrawShop()
 
     private void FirePlayerWeapon()
     {
+        PulseGamePad(_pilot.PrimaryMode==PrimaryWeaponMode.Lance?.25f:.08f,
+            _pilot.PrimaryMode==PrimaryWeaponMode.Gatling?.12f:.22f);
         // Pulse/Lance/Arc: exactly one projectile per level. Gatling fires ONE rapid shot;
         // Beam is handled by UpdateContinuousBeam and never creates ordinary shots.
         int level=Math.Clamp(_pilot.WeaponLevel,1,Pilot.MaxWeaponLevel);
@@ -2503,6 +2523,7 @@ private void DrawShop()
     private void HurtPilot()
     {
         if(_pilot.Invincible>0 || _bossFinaleTimer>0) return;
+        PulseGamePad(_pilot.Shield>0?.45f:1f,_pilot.Shield>0?.70f:.85f);
         if(_hitEffectStrength>0) _hitFeedbackTime=.5f;
         _audio?.Effect(_pilot.Shield>0?"shield":"damage",.20f,.7f);
         if(_pilot.Shield>0)
@@ -2701,6 +2722,12 @@ private void DrawShop()
 
     private void Boom(Vector2 where,int amount,Color baseColor)
     {
+        if(amount>=16)
+        {
+            float proximity=1f-MathHelper.Clamp(Vector2.Distance(where,_pilot.Position)/1200f,0f,1f);
+            float impact=MathHelper.Clamp(amount/120f,.08f,.65f)*proximity;
+            PulseGamePad(impact,impact*.45f);
+        }
         if(amount>=16) _audio?.Effect("explosion",.15f,amount>=60?.85f:.55f);
         if(amount>=7 && _combatFxEnabled)
         {
@@ -3705,10 +3732,12 @@ private void DrawHelpOverlay()
     }
     else if(_helpPage==2)
     {
-        keysA=new[]{"LEFT STICK","D-PAD","RT / X","LT","LB / RB","START","A / B","BACK","Y"};
+        keysA=_usingDualSense
+            ?new[]{"LEFT / RIGHT STICK","D-PAD","R2 / SQUARE","L2","L1 / R1","OPTIONS","CROSS / CIRCLE","CREATE / TOUCHPAD","TRIANGLE","SQUARE ON GAME OVER"}
+            :new[]{"LEFT / RIGHT STICK","D-PAD","RT / X","LT","LB / RB","MENU","A / B","VIEW","Y","X ON GAME OVER"};
         labelsA=new[]{"ANALOG SHIP MOVEMENT","DIGITAL MOVE / MENUS",
             "FIRE / HOLD BEAM","PRECISION MOVEMENT","PREV / NEXT WEAPON",
-            "PAUSE / NEXT SECTOR","CONFIRM / CANCEL","OPEN / CLOSE HELP","OPEN / CLOSE SETTINGS"};
+            "PAUSE / NEXT SECTOR","CONFIRM / CANCEL","OPEN / CLOSE HELP","OPEN / CLOSE SETTINGS","RESUME CHECKPOINT"};
     }
     else
     {
@@ -3735,8 +3764,10 @@ private void DrawSettingsOverlay()
 {
     ModalPanel("SYSTEM CONFIGURATION");
     Color cyan=new(105,225,252),gold=new(255,205,107),muted=new(188,218,240);
-    DrawMenuButton(new Rectangle(103,239,828,85),"AUDIO / VIDEO",_settingsTab==0,false,.70f);
-    DrawMenuButton(new Rectangle(971,239,828,85),"KEY BINDINGS",_settingsTab==1,false,.70f);
+    DrawMenuButton(new Rectangle(103,239,548,85),"AUDIO / VIDEO",_settingsTab==0,false,.60f);
+    DrawMenuButton(new Rectangle(677,239,548,85),"KEY BINDINGS",_settingsTab==1,false,.60f);
+    DrawMenuButton(new Rectangle(1251,239,548,85),"CONTROLLERS",_settingsTab==2,false,.60f);
+    if(_settingsTab==2) { DrawControllerSettings();return; }
     if(_settingsTab==1)
     {
         int page=_controlsSelection/8;
@@ -3816,6 +3847,8 @@ private void DrawTitle()
     Color cyan=new(112,228,255),gold=new(255,205,107);
     _batch.Draw(_logo,new Rectangle(96,66,1480,233),Color.White);
     _ui.TextShadow(_batch,"PILOT COMMAND / MISSION SELECT",new Vector2(125,298),.52f,cyan);
+    _ui.TextFit(_batch,ControllerStatus,
+        new Vector2(125,344),.30f,1640,_pad.IsConnected?Color.LawnGreen:gold);
     string[] labels={"NEW GAME","CONTINUE MISSION","SETTINGS","CONTROLS / HELP","EXIT GAME"};
     for(int i=0;i<labels.Length;i++)
     {
@@ -3860,8 +3893,9 @@ private void DrawPauseMenu()
             new Vector2(ViewWidth/2,358),.42f,Color.White,true);
         _ui.TextShadow(_batch,"SCORE  "+_score.ToString("N0", System.Globalization.CultureInfo.InvariantCulture),new Vector2(ViewWidth/2,486),.75f,Color.White,true);
         _ui.TextShadow(_batch,"BEST  "+_bestScore.ToString("N0", System.Globalization.CultureInfo.InvariantCulture),new Vector2(ViewWidth/2,594),.50f,Color.Cyan,true);
-        DrawMenuButton(new Rectangle(535,709,850,94),"ENTER / R: NEW GAME",true,false,.52f);
-        _ui.TextShadow(_batch,_checkpointUnlocked&&!complete?"C: CHECKPOINT     ESC: MAIN MENU":"ESC: MAIN MENU",
+        DrawMenuButton(new Rectangle(535,709,850,94),_usingDualSense?"CROSS / ENTER: NEW GAME":"A / ENTER / R: NEW GAME",true,false,.52f);
+        string checkpoint=_usingDualSense?"SQUARE / C: CHECKPOINT":"X / C: CHECKPOINT";
+        _ui.TextShadow(_batch,_checkpointUnlocked&&!complete?checkpoint+"     ESC: MAIN MENU":"ESC: MAIN MENU",
             new Vector2(ViewWidth/2,848),.35f,Color.Cyan,true);
     }
 
@@ -3965,6 +3999,8 @@ private void DrawPauseMenu()
 
     protected override void UnloadContent()
     {
+        StopGamePadFeedback();
+        _dualSense.Dispose();
         _audio?.Dispose();_audio=null;
         _scene?.Dispose();_pixel?.Dispose();
         base.UnloadContent();
