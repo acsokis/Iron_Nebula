@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>IronNebula</AssemblyName>
+    <RootNamespace>IronNebula</RootNamespace>
+    <ApplicationTitle>IRON NEBULA - Alpha 0.9.11 Mouse and Display UI</ApplicationTitle>
+    <Version>0.9.11</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.6" />
+    <Content Include="Assets\**\*.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\**\*.jpg" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Audio\*.mp3" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Audio\*.wav" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
