@@ -46,7 +46,7 @@ public sealed partial class IronNebulaGame
         }
         _ui.TextFit(_batch,"USB: HD ACTUATOR AUDIO WHEN AVAILABLE. BT: RUMBLE OR EXPERIMENTAL HD STREAM.",
             new Vector2(110,934),.36f,1670,cyan);
-        _ui.TextFit(_batch,"ARROWS / D-PAD ADJUST   TAB / R1 / RB NEXT PAGE   CIRCLE / B / ESC CLOSE",
+        _ui.TextFit(_batch,NavigatePrompt+" ADJUST   "+PagePrompt+" NEXT PAGE   "+BackPrompt+" CLOSE",
             new Vector2(110,1017),.37f,1670,Color.White);
     }
 }

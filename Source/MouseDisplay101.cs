@@ -287,6 +287,6 @@ public sealed partial class IronNebulaGame
             _ui.Rect(_batch,new Rectangle(r.X,r.Y,active?9:3,r.Height),active?gold:cyan*.6f);
             _ui.Text(_batch,ResolutionOptions[index].Name,new Vector2(r.X+25,r.Y+12),.53f,active?gold:Color.White);
         }
-        _ui.Text(_batch,"ENTER / CLICK  APPLY       ESC  CANCEL",new Vector2(1062,846),.33f,cyan);
+        _ui.TextFit(_batch,ConfirmPrompt+" APPLY     "+BackPrompt+" CANCEL",new Vector2(1062,846),.33f,780,cyan);
     }
 }

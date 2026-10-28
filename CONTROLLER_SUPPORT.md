@@ -21,6 +21,17 @@ connecting do not immediately confirm a menu or toggle pause.
 
 Keyboard and mouse remain supported. Losing window focus pauses flight and stops
 weapon audio and vibration. Resume explicitly after returning to the window.
+
+Menu hints automatically follow the selected controller: colored Xbox face-button
+icons or DualSense Cross/Circle/Square/Triangle and shoulder/system-button icons.
+This covers title, pause, shop, difficulty, help, settings, resolution selection,
+and game-over prompts. Disconnecting all controllers restores keyboard labels.
+The icons are drawn by the native renderer and require no extra image/font assets.
+
+For visual verification with the game's real renderer, run
+`dotnet run --project Tools/GlyphPreview/GlyphPreview.csproj -c Release -- Assets/ui_atlas.png bin/controller-glyphs.png`.
+This exports all 24 icons and Xbox/DualSense menu examples; it does not emulate a
+physical controller or validate device recognition.
 Direct mouse positioning is preserved; even small stick movement can take over
 flight, and a stationary mouse cannot override a controller menu selection.
 

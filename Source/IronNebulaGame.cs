@@ -1028,11 +1028,11 @@ private void DrawShop()
     _ui.TextFit(_batch,priceText,new Vector2(1512,847),.74f,345,gold);
     if(_shopFeedbackTime>0)
         _ui.TextFit(_batch,_shopFeedback,new Vector2(515,912),.39f,650,Color.LawnGreen);
-    DrawMenuButton(new Rectangle(1508,908,352,61),"BUY SELECTED",false,false,.45f);
+    DrawMenuButton(new Rectangle(1508,908,352,61),ConfirmPrompt+" BUY",false,false,.45f);
     _ui.Rect(_batch,new Rectangle(0,982,ViewWidth,98),new Color(2,11,27,247));
-    _ui.TextShadow(_batch,"LEFT / RIGHT  CATEGORY        CLICK ITEM / ENTER  BUY",
+    _ui.TextShadow(_batch,HorizontalPrompt+" CATEGORY     "+ConfirmPrompt+" BUY",
         new Vector2(750,1007),.41f,cyan,true);
-    DrawMenuButton(new Rectangle(1636,990,264,78),"CONTINUE",true,false,.42f);
+    DrawMenuButton(new Rectangle(1636,990,264,78),ContinuePrompt+" NEXT",true,false,.42f);
 }
 
     private void UpdateBackground(float dt,float factor=1)
@@ -3724,8 +3724,8 @@ private void DrawHelpOverlay()
     }
     else if(_helpPage==1)
     {
-        keysA=new[]{"ARROWS / MOUSE","ENTER / CLICK","ESC / B","LEFT / RIGHT / CLICK","C / START",
-            "F1 / BACK","F12 / O / Y","TAB / RB","DELETE","ENTER / A"};
+        keysA=new[]{NavigatePrompt,ConfirmPrompt,BackPrompt,HorizontalPrompt,ContinuePrompt,
+            HelpPrompt,SettingsPrompt,PagePrompt,"DELETE (KEYBOARD)",ConfirmPrompt};
         labelsA=new[]{"NAVIGATE MENUS","CONFIRM / BUY","RETURN / CLOSE",
             "CHANGE SHOP CATEGORY","NEXT SECTOR AFTER SHOP","OPEN / CLOSE HELP",
             "OPEN SETTINGS","SETTINGS PAGE SWITCH","RESET KEY BINDINGS", "NEW GAME: CHOOSE DIFFICULTY"};
@@ -3733,8 +3733,8 @@ private void DrawHelpOverlay()
     else if(_helpPage==2)
     {
         keysA=_usingDualSense
-            ?new[]{"LEFT / RIGHT STICK","D-PAD","R2 / SQUARE","L2","L1 / R1","OPTIONS","CROSS / CIRCLE","CREATE / TOUCHPAD","TRIANGLE","SQUARE ON GAME OVER"}
-            :new[]{"LEFT / RIGHT STICK","D-PAD","RT / X","LT","LB / RB","MENU","A / B","VIEW","Y","X ON GAME OVER"};
+            ?new[]{"\uE009 / \uE00A","\uE008","\uE012 / \uE006","\uE011","\uE00F / \uE010","\uE015","\uE004 / \uE005","\uE016 / \uE017","\uE007","\uE006"}
+            :new[]{"\uE009 / \uE00A","\uE008","\uE00E / \uE002","\uE00D","\uE00B / \uE00C","\uE013","\uE000 / \uE001","\uE014","\uE003","\uE002"};
         labelsA=new[]{"ANALOG SHIP MOVEMENT","DIGITAL MOVE / MENUS",
             "FIRE / HOLD BEAM","PRECISION MOVEMENT","PREV / NEXT WEAPON",
             "PAUSE / NEXT SECTOR","CONFIRM / CANCEL","OPEN / CLOSE HELP","OPEN / CLOSE SETTINGS","RESUME CHECKPOINT"};
@@ -3756,7 +3756,7 @@ private void DrawHelpOverlay()
         _ui.TextFit(_batch,keysA[i].ToUpperInvariant(),new Vector2(x+27,y+7),.61f,780,gold);
         _ui.TextFit(_batch,labelsA[i],new Vector2(x+30,y+66),.47f,785,muted);
     }
-    _ui.TextShadow(_batch,"CLICK LEFT / RIGHT TO CHANGE PAGE       F1 / ESC / B  CLOSE",
+    _ui.TextShadow(_batch,HorizontalPrompt+" PAGE     "+HelpPrompt+" / "+BackPrompt+" CLOSE",
         new Vector2(ViewWidth/2,1009),.46f,cyan,true);
 }
 
@@ -3788,9 +3788,9 @@ private void DrawSettingsOverlay()
             _ui.TextFit(_batch,action.ToString().ToUpperInvariant(),new Vector2(x+31,y+16),.57f,670,chosen?Color.White:muted);
             _ui.TextFit(_batch,_bindings[action].ToString().ToUpperInvariant(),new Vector2(x+33,y+72),.54f,610,chosen?gold:cyan);
         }
-        _ui.TextFit(_batch,_bindingCapture?"PRESS NEW KEY - ESC CANCEL":_bindingNotice,
+        _ui.TextFit(_batch,_bindingCapture?"PRESS NEW KEY - "+BackPrompt+" CANCEL":_bindingNotice,
             new Vector2(107,966),.43f,1680,_bindingCapture?gold:cyan);
-        _ui.TextShadow(_batch,"UP / DOWN  SELECT      ENTER  REBIND      DELETE  RESET      TAB  AUDIO / VIDEO",
+        _ui.TextShadow(_batch,NavigatePrompt+" SELECT   "+ConfirmPrompt+" REBIND   DELETE RESET   "+PagePrompt+" NEXT PAGE",
             new Vector2(ViewWidth/2,1024),.40f,Color.White,true);
         return;
     }
@@ -3820,7 +3820,7 @@ private void DrawSettingsOverlay()
             _ui.Bar(_batch,new Rectangle(x+460,y+58,335,14),val/100f,cyan);
         }
     }
-    _ui.TextShadow(_batch,"CLICK / ENTER  RESOLUTION LIST     ARROWS  ADJUST     TAB  KEY BINDINGS     ESC  CLOSE",
+    _ui.TextShadow(_batch,ConfirmPrompt+" SELECT   "+NavigatePrompt+" ADJUST   "+PagePrompt+" NEXT PAGE   "+BackPrompt+" CLOSE",
         new Vector2(ViewWidth/2,1017),.43f,cyan,true);
     if(_resolutionDropdownOpen) DrawResolutionDropdown();
 }
@@ -3865,7 +3865,7 @@ private void DrawTitle()
         new Vector2(1055,916),.43f,720,_hasDiskSave?Color.LawnGreen:cyan);
     _ui.Text(_batch,"DEFAULT DIFFICULTY: "+DifficultyName(_selectedDifficulty),new Vector2(1055,959),.40f,gold);
     _ui.Rect(_batch,new Rectangle(0,1005,ViewWidth,75),new Color(3,12,28,250));
-    _ui.TextShadow(_batch,"UP / DOWN  SELECT       ENTER / A  CONFIRM       F1  HELP       F12  SETTINGS",
+    _ui.TextShadow(_batch,NavigatePrompt+" SELECT   "+ConfirmPrompt+" CONFIRM   "+HelpPrompt+" HELP   "+SettingsPrompt+" SETTINGS",
         new Vector2(ViewWidth/2,1024),.43f,cyan,true);
 }
 
@@ -3879,7 +3879,7 @@ private void DrawPauseMenu()
     string[] labels={"RESUME FLIGHT","SETTINGS","CONTROLS / HELP","RETURN TO BASE"};
     for(int i=0;i<labels.Length;i++)
         DrawMenuButton(new Rectangle(486,365+i*129,950,115),labels[i],i==_pauseMenuSelection,false,.86f);
-    _ui.TextShadow(_batch,"ESC / START  RESUME       ENTER / A  SELECT",
+    _ui.TextShadow(_batch,ResumePrompt+" RESUME     "+ConfirmPrompt+" SELECT",
         new Vector2(ViewWidth/2,929),.47f,cyan,true);
 }
 
@@ -3893,9 +3893,9 @@ private void DrawPauseMenu()
             new Vector2(ViewWidth/2,358),.42f,Color.White,true);
         _ui.TextShadow(_batch,"SCORE  "+_score.ToString("N0", System.Globalization.CultureInfo.InvariantCulture),new Vector2(ViewWidth/2,486),.75f,Color.White,true);
         _ui.TextShadow(_batch,"BEST  "+_bestScore.ToString("N0", System.Globalization.CultureInfo.InvariantCulture),new Vector2(ViewWidth/2,594),.50f,Color.Cyan,true);
-        DrawMenuButton(new Rectangle(535,709,850,94),_usingDualSense?"CROSS / ENTER: NEW GAME":"A / ENTER / R: NEW GAME",true,false,.52f);
-        string checkpoint=_usingDualSense?"SQUARE / C: CHECKPOINT":"X / C: CHECKPOINT";
-        _ui.TextShadow(_batch,_checkpointUnlocked&&!complete?checkpoint+"     ESC: MAIN MENU":"ESC: MAIN MENU",
+        DrawMenuButton(new Rectangle(535,709,850,94),ConfirmPrompt+": NEW GAME",true,false,.52f);
+        string checkpoint=CheckpointPrompt+": CHECKPOINT";
+        _ui.TextShadow(_batch,_checkpointUnlocked&&!complete?checkpoint+"     "+BackPrompt+": MAIN MENU":BackPrompt+": MAIN MENU",
             new Vector2(ViewWidth/2,848),.35f,Color.Cyan,true);
     }
 
