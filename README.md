@@ -7,6 +7,10 @@ HDR display output are capability-gated. See [browser setup and controls](Web/RE
 and the [release security audit](Web/SECURITY_AUDIT.md). Browser rooms and saves are
 separate from the native Windows edition. GitHub Pages deployment is included.
 
+**[Play the browser edition](https://acsokis.github.io/Iron_Nebula/)** — published
+from the contributor fork. Choose **Host wing / Join wing** for browser co-op or
+**Phone pad** to pair a phone. See the browser guide for NAT/TURN and HDR limits.
+
 Xbox and native PS5 DualSense support: see [Controller support](CONTROLLER_SUPPORT.md)
 for controls, adaptive triggers, USB haptics, and validation status. Bluetooth HD
 haptics is an experimental option and is **disabled by default**.
