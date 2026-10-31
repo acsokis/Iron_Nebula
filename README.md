@@ -4,15 +4,20 @@ Xbox and native PS5 DualSense support: see [Controller support](CONTROLLER_SUPPO
 for controls, adaptive triggers, USB haptics, and validation status. Bluetooth HD
 haptics is an experimental option and is **disabled by default**.
 
-The current contribution also carries smooth mouse flight with a visible cursor.
-See [Online/LAN co-op feasibility](COOP_FEASIBILITY.md) for the 2–6-player source audit;
-network co-op is not implemented in this build.
+**New: playable 2–6-player Online/LAN co-op.** Open **ONLINE / LAN CO-OP** in the
+main menu, host a party, then share the displayed `address:port/roomcode` with guests.
+See [Co-op setup and validation](COOP_SUPPORT.md) for controls, Internet connectivity
+requirements and the first-alpha limitations. Smooth mouse flight and controller
+icons remain supported. Co-op does not overwrite solo saves/high scores.
 
-**Alpha 0.9.11.2 — Direct Mouse Flight** · Windows desktop · C# / .NET 8 / MonoGame WindowsDX
+**Alpha 0.9.12 — Online Co-op** · Windows desktop · C# / .NET 8 / MonoGame WindowsDX
 
 A saját fejlesztésű, vízszintesen scrollozó sci-fi shoot ’em up játék. Három szektor, öt váltható és fejleszthető primary weapon, minibossok és főbossok, szektorvégi shop, mentés/Continue, billentyűzet-, egér- és Xbox-kompatibilis kontrollerkezelés.
 
-> **Státusz:** aktív Alpha fejlesztés. A 0.9.11.2 Windows alatt a projekt készítőjének visszajelzése szerint működik. A GitHubra kihelyezett csomag verziójának további automatizált és teljes, végigjátszásos tesztje még hátravan.
+> **Validation:** Windows Release build and controller/loopback checks pass. A real
+> game host plus five client processes exercised six ships, all weapons, all three
+> sectors and a rendered guest. Physical multi-PC Internet/LAN testing and a full
+> human campaign playthrough remain pending. See [details](COOP_SUPPORT.md).
 
 ## Indítás Windowson
 

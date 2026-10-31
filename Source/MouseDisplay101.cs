@@ -80,9 +80,9 @@ public sealed partial class IronNebulaGame
     private bool HandleTitleMouseInput()
     {
         if(!_mouseValid || (!_mouseMoved && !_mouseClick)) return false;
-        for(int i=0;i<5;i++)
+        for(int i=0;i<6;i++)
         {
-            Rectangle r=new(110,375+i*124,827,111);
+            Rectangle r=new(110,375+i*103,827,94);
             if(r.Contains((int)_mouseUi.X,(int)_mouseUi.Y))
             {
                 _titleMenuSelection=i;
@@ -145,6 +145,7 @@ public sealed partial class IronNebulaGame
     }
     private void ContinueShopByMouse()
     {
+        if(CoopActive) { _coopReady=!_coopReady;return; }
         if(_shopAfterFinalSector && _infernoActive) FinishRun(true);
         else
         {

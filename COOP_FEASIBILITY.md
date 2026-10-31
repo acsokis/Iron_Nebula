@@ -1,4 +1,9 @@
-# Online/LAN co-op feasibility: 2–6 players
+# Historical baseline audit: Online/LAN co-op
+
+**Superseded by the playable implementation.** This file preserves the assessment
+made before co-op was implemented. Its references to missing networking describe
+that earlier baseline. For the current game, setup and verified behavior, read
+[Online/LAN co-op support](COOP_SUPPORT.md).
 
 Assessment date: 2026-10-31. Requested mode: separate PCs, one locally controlled
 pilot per PC. Verdict: feasible as a substantial gameplay/network refactor in the

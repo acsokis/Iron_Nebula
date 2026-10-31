@@ -145,7 +145,7 @@ public sealed partial class IronNebulaGame
 
     private void SaveBoundary(string stage)
     {
-        if(_trainingRun||_restoringRun) return;
+        if(CoopActive||_trainingRun||_restoringRun) return;
         bool shop=stage=="Shop";
         var data=new RunSaveData
         {

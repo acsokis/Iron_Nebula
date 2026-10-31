@@ -1,4 +1,4 @@
-name: Controller support checks
+name: Controller and co-op checks
 
 on:
   pull_request:
@@ -21,3 +21,5 @@ jobs:
         run: dotnet build IronNebula.csproj -c Release
       - name: Verify controller packets, navigation, and haptic audio
         run: dotnet run --project Tools/ControllerChecks/ControllerChecks.csproj -c Release
+      - name: Verify six-player loopback networking
+        run: dotnet run --project Tools/CoopChecks/CoopChecks.csproj -c Release

@@ -8,11 +8,12 @@ public sealed partial class IronNebulaGame
 {
     private float _rumbleLow, _rumbleHigh;
 
-    private bool CanRumble => IsActive && _pad.IsConnected &&
+    private bool CanRumble => IsActive && _pad.IsConnected && (!CoopActive || _pilot.Lives>0) &&
         _mode==GameMode.Playing && !_helpOpen && !_settingsOpen && !_difficultyPromptOpen;
 
     private void PulseGamePad(float low, float high)
     {
+        if(_coopHost!=null && _coopActorId!=0) return;
         if(!CanRumble) return;
         // Mix by maximum, so rapid fire cannot overpower a damage impact.
         _rumbleLow=MathF.Max(_rumbleLow,Math.Clamp(low,0f,1f));
