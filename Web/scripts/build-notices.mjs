@@ -13,6 +13,6 @@ for(const [path,entry]of Object.entries(lock.packages)){
   for(const name of names){const text=await readFile(join(dir,name),'utf8');if(text.length>200000)throw new Error('Unexpectedly large license file.');notices.push(`${name}\n${text}`);}
   if(!names.length)notices.push('No top-level license text file was included by this package. Refer to its pinned npm package metadata.');
 }
-await writeFile('public/THIRD_PARTY_NOTICES.txt',notices.join('\n')+'\n');
+await writeFile('public/THIRD_PARTY_NOTICES.txt',notices.join('\n').trimEnd()+'\n');
 await writeFile('public/dependency-licenses.json',JSON.stringify(inventory.sort((a,b)=>a.name.localeCompare(b.name)),null,2)+'\n');
 console.log(`Recorded licenses for ${inventory.length} installed production packages.`);
