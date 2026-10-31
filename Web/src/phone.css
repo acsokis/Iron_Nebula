@@ -1,0 +1,2 @@
+/* Preserve the fire label's contrast when touch browsers retain hover state. */
+.phone-face .fire-button:hover:not(:disabled){background:#bfeef7;color:#0e2a3c}

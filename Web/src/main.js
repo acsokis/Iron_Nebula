@@ -1,4 +1,5 @@
 import './style.css';
+import './phone.css';
 import {Renderer} from './renderer.js';
 import {Input,icon} from './input.js';
 import {AudioEngine} from './audio.js';
