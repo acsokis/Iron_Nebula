@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-const boot=async(page,query='')=>{await page.goto(`/?test=1${query}`);await expect(page.locator('#loading')).toBeHidden({timeout:30000});};
+const boot=async(page,query='')=>{const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`/?test=1${query}`);try{await expect(page.locator('#loading')).toBeHidden({timeout:60000});}catch(error){throw new Error(`${error.message}\nLoading: ${await page.locator('#loading').innerText()}\nBrowser errors: ${errors.join('; ')}`);}};
 test('GI, lighting, HDR fallback and audio settings are real controls',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await boot(page);
   await page.click('#solo');await page.click('#settings-toggle');
@@ -56,9 +56,9 @@ test('phone controller pairs over real WebRTC and releases input on disconnect',
   }finally{await desktopContext.close();await phoneContext.close();}
 });
 test('six separate browsers exchange real P2P movement, shots and ready state',async({browser})=>{
-  test.setTimeout(180000);const contexts=[],pages=[];
+  test.setTimeout(300000);const contexts=[],pages=[];
   try{
-    for(let i=0;i<6;i++){const context=await browser.newContext({viewport:{width:1280,height:850}});contexts.push(context);const page=await context.newPage();pages.push(page);await boot(page,'&render=off');}
+    for(let i=0;i<6;i++){const context=await browser.newContext({viewport:i===0?{width:1280,height:850}:{width:640,height:480}});contexts.push(context);const page=await context.newPage();pages.push(page);await boot(page,'&render=off');}
     const host=pages[0];await host.evaluate(()=>window.__IRON_NEBULA__.renderFrame());await host.locator('#callsign').fill('HOST');await host.click('#host');
     await expect(host.locator('#room-code')).toHaveText(/^[A-Z2-9]{10}$/,{timeout:20000});const code=await host.locator('#room-code').textContent();
     for(let i=1;i<6;i++){

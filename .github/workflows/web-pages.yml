@@ -40,7 +40,14 @@ jobs:
       - name: Build notices and licenses
         run: node scripts/build-notices.mjs
       - name: Browser, P2P, phone, graphics and production-CSP checks
-        run: npm run test:browser
+        run: npm run test:browser -- --reporter=line
+      - name: Retain browser diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-failure-diagnostics
+          path: Web/test-results
+          retention-days: 7
       - name: Verify final static release
         run: npm run release:verify
       - name: Upload checked Pages artifact
