@@ -38,15 +38,13 @@ public sealed partial class IronNebulaGame
         if(!liveFlight) _mouseFlightActive=false;
         if(liveFlight && _mouseValid && (_mouseMoved || _mouseClick || _mouseFlightActive))
         {
-            // The pointer IS the ship, after converting from the letterboxed window
-            // to the 1920x1080 game world. There is no follow speed or acceleration.
+            // Pointer target in the letterboxed game world; flight follows with
+            // a short critically damped tether rather than teleporting.
             _mouseTarget=new Vector2(MathHelper.Clamp(_mouseUi.X,105f,ViewWidth-145f),
                 MathHelper.Clamp(_mouseUi.Y,110f,ViewHeight-115f));
             if(_mouseMoved || _mouseClick) _mouseFlightActive=true;
         }
-        // Keep the native cursor for menus and keyboard/controller flight. When
-        // flying directly with the mouse, the ship sprite itself is the pointer.
-        IsMouseVisible=!(liveFlight && _mouseFlightActive && _mouseValid);
+        IsMouseVisible=true;
     }
 
     private bool MovePilotDirectlyWithMouse(Vector2 keyboardOrPad, float dt)
@@ -66,14 +64,16 @@ public sealed partial class IronNebulaGame
             _pilot.Velocity=Vector2.Zero;
             return true;
         }
-        Vector2 oldPosition=_pilot.Position;
-        _pilot.Position=_mouseTarget; // Instant 1:1 pointer positioning, not a chase.
-        // Velocity remains a bounded visual/gameplay hint for tilt and prediction;
-        // it must not be fed back into position when the mouse controls the ship.
-        Vector2 delta=(_pilot.Position-oldPosition)/MathF.Max(dt,.001f);
-        float length=delta.Length();
-        if(length>550f) delta*=550f/length;
-        _pilot.Velocity=delta;
+        // Exact critically damped spring integration: stable for variable dt,
+        // smooth acceleration, no overshoot from a stationary start.
+        float spring=_precisionFire?12f:18f;
+        Vector2 offset=_pilot.Position-_mouseTarget;
+        Vector2 impulse=_pilot.Velocity+spring*offset;
+        float decay=MathF.Exp(-spring*dt);
+        _pilot.Position=_mouseTarget+(offset+impulse*dt)*decay;
+        _pilot.Velocity=(_pilot.Velocity-spring*impulse*dt)*decay;
+        _pilot.Position=new Vector2(MathHelper.Clamp(_pilot.Position.X,105f,ViewWidth-145f),
+            MathHelper.Clamp(_pilot.Position.Y,110f,ViewHeight-115f));
         return true;
     }
 

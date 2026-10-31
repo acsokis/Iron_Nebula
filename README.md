@@ -4,6 +4,10 @@ Xbox and native PS5 DualSense support: see [Controller support](CONTROLLER_SUPPO
 for controls, adaptive triggers, USB haptics, and validation status. Bluetooth HD
 haptics is an experimental option and is **disabled by default**.
 
+The current contribution also carries smooth mouse flight with a visible cursor.
+See [Online/LAN co-op feasibility](COOP_FEASIBILITY.md) for the 2–6-player source audit;
+network co-op is not implemented in this build.
+
 **Alpha 0.9.11.2 — Direct Mouse Flight** · Windows desktop · C# / .NET 8 / MonoGame WindowsDX
 
 A saját fejlesztésű, vízszintesen scrollozó sci-fi shoot ’em up játék. Három szektor, öt váltható és fejleszthető primary weapon, minibossok és főbossok, szektorvégi shop, mentés/Continue, billentyűzet-, egér- és Xbox-kompatibilis kontrollerkezelés.

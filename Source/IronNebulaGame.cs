@@ -157,7 +157,7 @@ public sealed partial class IronNebulaGame : Game
         IsFixedTimeStep=true;
         TargetElapsedTime=TimeSpan.FromSeconds(1.0/60.0);
         IsMouseVisible=true;
-        Window.Title="IRON NEBULA  |  ALPHA 0.9.11.2 - XBOX / DUALSENSE";
+        Window.Title="IRON NEBULA  |  ALPHA 0.9.11.2 - SMOOTH FLIGHT / XBOX / DUALSENSE";
         Window.AllowUserResizing=true;
     }
 

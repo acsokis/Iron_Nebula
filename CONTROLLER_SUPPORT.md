@@ -32,8 +32,9 @@ For visual verification with the game's real renderer, run
 `dotnet run --project Tools/GlyphPreview/GlyphPreview.csproj -c Release -- Assets/ui_atlas.png bin/controller-glyphs.png`.
 This exports all 24 icons and Xbox/DualSense menu examples; it does not emulate a
 physical controller or validate device recognition.
-Direct mouse positioning is preserved; even small stick movement can take over
-flight, and a stationary mouse cannot override a controller menu selection.
+Mouse flight follows the visible cursor through a short damped spring rather than
+teleporting. Precision mode softens the follow response. Even small stick movement
+can take over flight, and a stationary mouse cannot override a controller menu selection.
 
 ## Native DualSense
 

@@ -111,6 +111,7 @@ internal sealed partial class UiRenderer
                 line="";
             }
             // Split unusually long tokens rather than running outside the panel.
+            if(line.Length>0)line+=" ";
             foreach(char c in word)
             {
                 if(line.Length>0 && WidthOf(line+c)>maxAdvance)
@@ -121,7 +122,6 @@ internal sealed partial class UiRenderer
                 }
                 line+=c;
             }
-            line+=" ";
         }
         if(line.Trim().Length>0) Text(batch,line.TrimEnd(),new Vector2(at.X,y),scale,color);
     }
