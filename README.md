@@ -1,5 +1,12 @@
 # IRON NEBULA
 
+**Browser edition 0.9.13:** a static WebGL 2 adaptation with up to six players over
+WebRTC, phone controllers, automatic Xbox/PlayStation button icons, dynamic lighting,
+2D GI, bloom, fog, smoke and synthesized chip audio. HDR lighting and experimental
+HDR display output are capability-gated. See [browser setup and controls](Web/README.md)
+and the [release security audit](Web/SECURITY_AUDIT.md). Browser rooms and saves are
+separate from the native Windows edition. GitHub Pages deployment is included.
+
 Xbox and native PS5 DualSense support: see [Controller support](CONTROLLER_SUPPORT.md)
 for controls, adaptive triggers, USB haptics, and validation status. Bluetooth HD
 haptics is an experimental option and is **disabled by default**.

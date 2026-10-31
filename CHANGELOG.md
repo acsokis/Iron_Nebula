@@ -2,6 +2,22 @@
 
 A projekthez tartozó kiadástörténet 2026. október 28-i állapot szerint. A felsorolt Alpha változatok a fejlesztés történeti mérföldkövei; a csomag a **0.9.11.2** állapotot reprezentálja. A fejlesztések funkcionális összefoglalói alapján készült, nem külön-külön Git-commitból rekonstruált történet.
 
+## Browser 0.9.13 - WebGL flight
+
+- Add a static WebGL 2 browser campaign and host-authoritative WebRTC co-op for
+  one host and five guests, with bounded input/snapshot protocols and backpressure.
+- Add a separate temporary phone-controller link, QR pairing, touch controls,
+  automatic Xbox/PlayStation/keyboard icons and controller menu navigation.
+- Add dynamic lights, soft shadows, screen-space 2D GI diffusion, bloom, fog,
+  smoke, float HDR lighting and optional feature-gated extended-range output.
+- Add original Atari-inspired synthesized effects, ambience and music controls.
+- Add pinned dependencies, strict production CSP, asset/release checksums,
+  dependency licenses, protocol tests and real browser/WebRTC integration tests.
+- Add a pinned GitHub Actions build, audit, test and Pages deployment workflow.
+- Keep native TCP rooms, native saves and native DualSense effects separate.
+  Physical controllers, HDR luminance and multi-network NAT behavior still need
+  hardware testing; no TURN relay or host migration is supplied.
+
 ## Alpha 0.9.12 - Online Co-op
 
 - Add a playable 2–6-player host-authoritative Online/LAN mode with lobby, IPv4/DNS

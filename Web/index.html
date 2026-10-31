@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' __DEV_STYLE__; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.peerjs.com wss://*.peerjs.com __DEV_CONNECT__; media-src 'self' blob:; base-uri 'self'; form-action 'none'; object-src 'none'">
+  <meta name="theme-color" content="#07101f">
+  <meta name="description" content="Iron Nebula — a WebGL 2 space arcade with dynamic lighting, 2D GI, Atari-inspired audio and WebRTC co-op.">
+  <title>IRON NEBULA — Browser flight</title>
+</head>
+<body>
+<div id="desktop">
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Iron Nebula home"><span class="brand-mark">⟐</span><span>IRON <b>NEBULA</b><small>WEB FLIGHT SYSTEM · 0.9.13</small></span></a>
+    <div class="connection-badge"><i id="connection-light"></i><span id="connection-state">LOCAL FLIGHT</span></div>
+    <nav aria-label="Flight tools">
+      <button id="sound-toggle" class="tool" aria-label="Toggle sound">♫<span>Sound</span></button>
+      <button id="phone-toggle" class="tool" aria-label="Use a phone as controller">▯<span>Phone pad</span></button>
+      <button id="settings-toggle" class="tool" aria-label="Settings"><span data-hint="settings"></span><span>Settings</span></button>
+      <button id="fullscreen" class="tool" aria-label="Fullscreen">⛶<span>Fullscreen</span></button>
+    </nav>
+  </header>
+  <main id="viewport">
+    <canvas id="game" aria-label="Iron Nebula WebGL 2 game"></canvas>
+    <div id="hud" hidden>
+      <div class="hud-top"><div><small id="sector-number">SECTOR 01</small><strong id="sector-name">OUTER FRONTIER</strong></div><div class="score"><small>SCORE</small><strong id="score">000000</strong></div><div class="wallet"><small>TEAM CREDITS</small><strong id="credits">0000 CR</strong></div><button id="pause-button" class="tool"><span data-hint="pause"></span>Menu</button></div>
+      <div id="boss-hud" hidden><span id="boss-name"></span><progress id="boss-health" max="1" value="1"></progress></div>
+      <div id="party-hud"></div>
+      <div class="weapon-hud"><span id="weapon-name">PULSE</span><span id="weapon-level">MK I</span><span data-hint="previous"></span><span data-hint="next"></span></div>
+    </div>
+    <section id="menu" class="screen">
+      <div class="intro"><div class="eyebrow"><i></i> SIGNAL ACQUIRED / DEEP SPACE ARCADE</div><h1>LIGHT UP<br>THE <em>VOID.</em></h1><p>Three sectors. Five weapons. One very loud way home.</p><div class="feature-line"><span>WEBGL 2</span><span>2D GI + LIGHTING</span><span>1–6 PILOTS</span></div></div>
+      <div class="command-panel"><small class="panel-caption">PILOT COMMAND</small><h2>Ready for departure?</h2><p class="muted">Solo flight, or bring your wing.</p>
+        <button id="solo" class="action primary"><span data-hint="confirm"></span><span>Launch solo<small>Start a new campaign</small></span><b>↗</b></button>
+        <button id="continue" class="action" disabled><span>↺</span><span>Continue flight<small>Local browser save</small></span></button>
+        <div class="menu-separator">CO-OP / WEBRTC P2P</div>
+        <label class="field compact">CALLSIGN<input id="callsign" maxlength="20" value="PILOT" autocomplete="off" spellcheck="false"></label>
+        <div class="dual-buttons"><button id="host" class="action compact"><span>＋</span><span>Host wing</span></button><button id="join-open" class="action compact"><span>↗</span><span>Join wing</span></button></div>
+        <div class="panel-footer"><span data-hint="navigate"></span> Navigate <span data-hint="confirm"></span> Select</div>
+      </div>
+      <div class="screen-footnote">ORIGINAL IRON NEBULA ART · ATARI-INSPIRED SYNTH AUDIO · NO INSTALL</div>
+    </section>
+    <section id="loading" class="screen loading"><div><div class="eyebrow">FLIGHT COMPUTER INITIALIZING</div><h2 id="loading-label">Loading the stars…</h2><progress id="loading-progress" max="1" value="0"></progress></div></section>
+    <section id="lobby" class="screen modal" hidden><div class="modal-card wide"><div class="eyebrow">WEBRTC / DIRECT DATA CHANNELS</div><h2>Your wing, assembled.</h2><p id="room-state" class="muted">Waiting for pilots…</p><div class="room-code"><span>ROOM CODE</span><strong id="room-code">—</strong><button id="copy-room">Copy invite</button></div><div id="seats"></div><p class="muted small">Host keeps this tab open. New pilots join in the lobby. Some networks require a TURN relay.</p><div class="dual-buttons"><button id="start-party" class="action primary"><span data-hint="confirm"></span><span>Launch wing</span></button><button id="leave-lobby" class="action"><span data-hint="back"></span><span>Leave</span></button></div></div></section>
+    <section id="join" class="screen modal" hidden><div class="modal-card"><div class="eyebrow">FIND YOUR WING</div><h2>Enter the room code.</h2><label class="field">HOST CODE<input id="join-code" maxlength="14" autocomplete="off" spellcheck="false" placeholder="ABCD EFGH JK"></label><p class="muted small">Your host must be online. Connections use the PeerJS signaling service; game state travels over WebRTC.</p><div class="dual-buttons"><button id="join-confirm" class="action primary">Connect</button><button data-close class="action">Back</button></div></div></section>
+    <section id="pause" class="screen modal" hidden><div class="modal-card"><div class="eyebrow" id="pause-caption">LOCAL FLIGHT MENU</div><h2>Take a breath.</h2><p class="muted" id="pause-note">Your solo flight is paused.</p><button id="resume" class="action primary"><span data-hint="confirm"></span>Return to flight</button><button id="pause-settings" class="action"><span data-hint="settings"></span>Flight settings</button><button id="exit-run" class="action danger"><span data-hint="back"></span>Leave flight</button></div></section>
+    <section id="shop" class="screen modal" hidden><div class="modal-card shop-card"><div class="eyebrow">SECTOR SECURED / ORBITAL ARMORY</div><div class="shop-heading"><h2>Refit. Recharge. Repeat.</h2><strong id="shop-credits"></strong></div><p id="shop-note" class="muted">Team credits. Host makes purchases.</p><div id="shop-items"></div><div id="ready-list"></div><button id="ready" class="action primary"><span data-hint="ready"></span><span id="ready-text">Ready for next sector</span></button></div></section>
+    <section id="ending" class="screen modal" hidden><div class="modal-card"><div class="eyebrow" id="ending-label">MISSION COMPLETE</div><h2 id="ending-title">The void remembers.</h2><p id="ending-score"></p><button id="replay" class="action primary">Return to command</button></div></section>
+    <section id="settings" class="screen modal" hidden><div class="modal-card settings-card"><div class="eyebrow">FLIGHT SYSTEMS</div><h2>Make it yours.</h2>
+      <div class="settings-grid">
+        <fieldset><legend>LIGHT & ATMOSPHERE</legend><label class="switch">Dynamic lighting<input id="lighting" type="checkbox" checked></label><label class="switch">2D global illumination<input id="gi" type="checkbox" checked></label><label class="switch">Soft shadows<input id="shadows" type="checkbox" checked></label><label class="switch">HDR lighting<input id="hdr-lighting" type="checkbox" checked></label><label class="switch">HDR display output<input id="hdr-display" type="checkbox"></label><p id="hdr-note" class="muted small"></p><label>Bloom<input id="bloom" type="range" min="0" max="1.5" step="0.05" value="0.8"></label><label>Fog / light scatter<input id="fog" type="range" min="0" max="1" step="0.05" value="0.38"></label><label>Render quality<select id="quality"><option value="1">High</option><option value="0.75">Balanced</option><option value="0.5">Low</option></select></label></fieldset>
+        <fieldset><legend>SOUND & CONTROL</legend><label>Atari-inspired effects<input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="0.55"></label><label>Space ambience / music<input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.3"></label><label class="switch">Controller vibration<input id="vibration" type="checkbox" checked></label><label>Difficulty<select id="difficulty"><option value="0">Easy</option><option value="1" selected>Normal</option><option value="2">Hard</option></select></label><div class="control-reference"><p><span data-hint="navigate"></span> Move / navigate</p><p><span data-hint="fire"></span> Fire <span data-hint="precision"></span> Precision</p><p><span data-hint="previous"></span><span data-hint="next"></span> Change weapon</p><p><span data-hint="pause"></span> Menu <span data-hint="back"></span> Back</p></div><p class="muted small">DualSense adaptive triggers require the Windows build. Browser vibration depends on your browser and controller.</p></fieldset>
+      </div>
+      <details><summary>Advanced P2P / optional TURN</summary><p class="muted small">Use your own ICE configuration if direct P2P fails. Credentials stay in memory and are never included in invite links or saved.</p><label class="field">ICE SERVERS JSON<textarea id="ice-config" rows="3" spellcheck="false">[{"urls":"stun:stun.l.google.com:19302"}]</textarea></label><button id="apply-ice">Apply for next connection</button></details>
+      <button data-close class="action primary"><span data-hint="back"></span>Back to flight</button>
+    </div></section>
+    <section id="phone-pair" class="screen modal" hidden><div class="modal-card"><div class="eyebrow">YOUR PHONE / YOUR FLIGHT STICK</div><h2>Pocket control.</h2><p class="muted">Scan this code on your phone. It controls your local pilot without taking a party slot.</p><img id="phone-qr" width="248" height="248" alt="Phone controller pairing QR code"><p id="phone-state" role="status">Preparing pairing…</p><code id="phone-code"></code><div class="dual-buttons"><button id="unpair">Unpair phone</button><button data-close>Back</button></div></div></section>
+  </main>
+  <footer class="statusbar"><span><i class="live-dot"></i> <span id="renderer-state">WEBGL 2</span></span><span id="input-state">KEYBOARD / MOUSE</span><span id="fx-state">GI · LIGHTING · BLOOM</span><a href="https://github.com/vizisiklo/Iron_Nebula" target="_blank" rel="noopener noreferrer">SOURCE ↗</a></footer>
+</div>
+<main id="phone-mode" hidden>
+  <header><span class="phone-brand">IRON NEBULA <small>POCKET CONTROLLER</small></span><button data-phone-exit>Disconnect</button></header>
+  <p data-phone-status role="status">Pairing…</p>
+  <div class="phone-shoulders"><button data-phone-button="4">LB / L1<br><small>PREVIOUS</small></button><button data-phone-button="6">LT / L2<br><small>PRECISION</small></button><button data-phone-button="5">RB / R1<br><small>NEXT</small></button></div>
+  <div class="phone-controls"><div class="touch-stick" role="application" aria-label="Movement joystick"><div class="stick-ring"></div><div class="stick-thumb"></div><span>FLIGHT</span></div><div class="phone-face"><button data-phone-button="0">✓<small>CONFIRM</small></button><button data-phone-button="7" class="fire-button">FIRE<small>HOLD</small></button><button data-phone-button="1">↩<small>BACK</small></button></div></div>
+  <div class="phone-system"><button data-phone-button="8">HELP</button><button data-phone-button="9">MENU / READY</button><button data-phone-button="3">SETTINGS</button><button data-phone-fullscreen>⛶</button></div>
+  <p class="muted small">Rotate for landscape. Touches release on blur or disconnect. No camera or microphone is used.</p>
+</main>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
