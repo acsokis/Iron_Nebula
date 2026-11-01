@@ -20,5 +20,7 @@
     <Content Include="Assets\**\*.jpg" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Audio\*.mp3" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Audio\*.wav" CopyToOutputDirectory="PreserveNewest" />
+    <Content Update="Assets\Audio\Propulsive Peak.mp3" CopyToPublishDirectory="Never" />
+    <Content Update="Assets\Audio\Propulsive Peak_stream.wav" CopyToPublishDirectory="Never" />
   </ItemGroup>
 </Project>
