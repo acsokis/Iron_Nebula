@@ -53,6 +53,7 @@ A projekt Windowsra készült; a fő projektfájl: `IronNebula.csproj`. A MonoGa
 - **Gazdaság:** kreditpickupok, szektorvégi eredményösszesítő, három shopkategória, hajó- és fegyverfejlesztések; Sector 01 kreditbevételének plafonja 900 CR.
 - **Nehézség:** Easy / Normal / Hard; New Game indításakor választható.
 - **Kijelző:** nagy betűk, F1 Help, F10 diagnosztika, testreszabható SFX/music hangerő.
+- **Hajó- és ellenfélhull:** alfa-maszkolt metallic backing követi a sprite textúráját, és a hull voxeljeinek sérülése után is látható marad.
 - **Megjelenítés:** 16:9 / 16:10, 720p–4K választható módok, MSAA, lövedékglow, találat utáni rövid blur/rázkódás, ablakméret monitorhoz illesztése.
 - **Irányítás:** billentyűzet, egér (hajó közvetlenül a kurzornál), kontroller; a menük egérrel is használhatók.
 

@@ -2,6 +2,12 @@
 
 A projekthez tartozó kiadástörténet 2026. október 28-i állapot szerint. A felsorolt Alpha változatok a fejlesztés történeti mérföldkövei; a csomag a **0.9.11.2** állapotot reprezentálja. A fejlesztések funkcionális összefoglalói alapján készült, nem külön-külön Git-commitból rekonstruált történet.
 
+## Cross-version metallic hull backing
+
+- Add alpha-matched metallic backing beneath ship and enemy hull sprites in the
+  Windows, browser and Godot renderers; keep the silhouette aligned while hull
+  voxels break away. Asteroid visuals remain unchanged.
+
 ## Browser 0.9.14 - Endless Orbit / native visual assets
 
 - Correct enemy and background mirroring using texture coordinates; use sharper
