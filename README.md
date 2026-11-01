@@ -72,19 +72,16 @@ PUBLISH_WINDOWS.bat Windows publikálás
 CHANGELOG.md        változástörténet
 ROADMAP.md          további terv
 DEVELOPMENT_HISTORY.md teljes fejlesztési idővonal
-PATCH_HISTORY.md    rekonstruált patchek sorrendje
 ```
 
 ## Fontos megjegyzés a zenei jogokról
 
-A *Propulsive Peak* felhasználó által biztosított hangsáv. **A nyilvános GitHub-repositoryba csak megfelelő terjesztési engedéllyel tölthető fel.** A helyi teljes archívum tartalmazza a felhasznált MP3-at és a streamelt WAV-ot; a nyilvános repóhoz mellékelt feltöltőútmutató ezeket alapértelmezetten kizárja a Git-commitból. Az egyéb grafikai assetek terjesztési joga is ellenőrizendő nyilvános kiadás előtt.
+A *Propulsive Peak* felhasználó által biztosított asztali hangsáv. A webes kiadás a felhasználó kifejezett kérésére tartalmazza, rögzített SHA256-ellenőrzéssel. A zeneszerző és a harmadik féltől származó licenc nem lett függetlenül igazolva; a projekthez nem társítunk kitalált Creative Commons vagy royalty-free engedélyt.
 
 ## Dokumentáció
 
 - [Teljes változástörténet](CHANGELOG.md)
 - [Mérföldkövek és történet](DEVELOPMENT_HISTORY.md)
 - [Roadmap](ROADMAP.md)
-- [0.9.11.2 release notes](RELEASE_NOTES_0.9.11.2.md)
-- [GitHub feltöltési útmutató](GITHUB_UPLOAD_HU.md)
 
-A későbbi fejlesztői kiadásokat továbbra is **csak változott/új fájlokat tartalmazó PATCH ZIP** formában készítjük el, megőrzött könyvtárszerkezettel.
+A fejlesztés közvetlenül a Git-repó forrásfájljain történik. Codexben ellenőrizhető módosításokkal, tesztekkel, commitokkal és CI-közzététellel dolgozunk; köztes forráscsomagokat nem készítünk.

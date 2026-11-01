@@ -38,6 +38,6 @@ A projekt saját fejlesztésű, Katakis-jellegű, de egyedi modern sci-fi horizo
 ## Szervezés
 
 - A játékhoz kapcsolódó változások verziónként külön forrásfájlokat és asseteket érintenek.
-- A használható alap a **0.9.11.2**, korábbi patchek egymásra építésével.
-- A felhasználó kifejezetten **változott fájlokat tartalmazó PATCH ZIP-eket** kér, az eredeti fájlstruktúra megtartásával.
-- A projekt később GitHub repositoryban követhető, rendszeres commitokkal és teljes changeloggal.
+- A fejlesztés alapja az aktuális Git-ág forrásállapota.
+- A módosítások közvetlenül a repóban, Codexben ellenőrizhető szerkesztésekkel készülnek.
+- A projekt GitHub repositoryban követhető, rendszeres commitokkal, CI-ellenőrzéssel és changeloggal.

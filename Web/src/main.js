@@ -96,11 +96,14 @@ async function boot(){
     catch(error){$('#phone-state').textContent=error.message;}});
   $('#unpair').addEventListener('click',()=>{phone.close();phonePairing=null;input.select(input.padProfile??'keyboard');$('#phone-state').textContent='Unpaired. Old QR code no longer works.';$('#phone-qr').removeAttribute('src');$('#phone-code').textContent='';});
   $('#apply-ice').addEventListener('click',()=>{try{iceServers=validIceServers(JSON.parse($('#ice-config').value));toast('ICE settings applied for the next connection. They are not saved.');}catch(error){toast(error.message);}});
-  const saveSettings=()=>{try{localStorage.setItem(settingsKey,JSON.stringify({lighting:renderer.settings.lighting,gi:renderer.settings.gi,shadows:renderer.settings.shadows,hdr:renderer.settings.hdr,bloom:renderer.settings.bloom,fog:renderer.settings.fog,quality:renderer.settings.quality,sfx:audio.sfx,music:audio.music,musicSource:audio.musicSource,tethered:input.tethered,endless,vibration:$('#vibration').checked,difficulty}));}catch{}};
+  const saveSettings=()=>{try{localStorage.setItem(settingsKey,JSON.stringify({lighting:renderer.settings.lighting,gi:renderer.settings.gi,shadows:renderer.settings.shadows,hdr:renderer.settings.hdr,bloom:renderer.settings.bloom,fog:renderer.settings.fog,quality:renderer.settings.quality,fxBudget:renderer.settings.fxBudget,profile:renderer.settings.profile,sfx:audio.sfx,music:audio.music,musicSource:audio.musicSource,tethered:input.tethered,endless,vibration:$('#vibration').checked,difficulty}));}catch{}};
+  const customGraphics=()=>{renderer.settings.profile='custom';$('#effects-profile').value='custom';};
+  function syncGraphics(){for(const key of ['lighting','gi','shadows'])$(`#${key}`).checked=renderer.settings[key];for(const key of ['quality','bloom','fog'])$(`#${key}`).value=String(renderer.settings[key]);$('#effects-profile').value=renderer.settings.profile;}
+  $('#effects-profile').addEventListener('change',event=>{renderer.preset(event.target.value);if(event.target.value==='custom')customGraphics();syncGraphics();saveSettings();});
   $('#music-source').addEventListener('change',event=>{audio.setMusicSource(event.target.value);saveSettings();});
-  for(const key of ['lighting','gi','shadows'])$(`#${key}`).addEventListener('change',event=>{renderer.settings[key]=event.target.checked;saveSettings();});
-  for(const key of ['bloom','fog'])$(`#${key}`).addEventListener('input',event=>{renderer.settings[key]=Number(event.target.value);saveSettings();});
-  $('#quality').addEventListener('change',event=>{renderer.settings.quality=Number(event.target.value);renderer.resize();saveSettings();});
+  for(const key of ['lighting','gi','shadows'])$(`#${key}`).addEventListener('change',event=>{renderer.settings[key]=event.target.checked;customGraphics();saveSettings();});
+  for(const key of ['bloom','fog'])$(`#${key}`).addEventListener('input',event=>{renderer.settings[key]=Number(event.target.value);customGraphics();saveSettings();});
+  $('#quality').addEventListener('change',event=>{renderer.settings.quality=Number(event.target.value);renderer.resize();customGraphics();saveSettings();});
   $('#hdr-lighting').disabled=!renderer.hdr;$('#hdr-lighting').checked=renderer.hdr;
   $('#hdr-lighting').addEventListener('change',event=>{renderer.setHdrLighting(event.target.checked);$('#hdr-display').checked=false;saveSettings();});
   const hdrPossible=!!navigator.gpu&&matchMedia('(dynamic-range: high)').matches&&renderer.hdr;
@@ -110,6 +113,8 @@ async function boot(){
   $('#sfx-volume').addEventListener('input',event=>{audio.sfx=Number(event.target.value);saveSettings();});$('#music-volume').addEventListener('input',event=>{audio.music=Number(event.target.value);saveSettings();});
   $('#difficulty').addEventListener('change',event=>{difficulty=Number(event.target.value);saveSettings();});$('#vibration').addEventListener('change',saveSettings);
   try{const saved=JSON.parse(localStorage.getItem(settingsKey));if(saved&&typeof saved==='object'){
+    renderer.settings.profile=['performance','balanced','high','custom'].includes(saved.profile)?saved.profile:'custom';
+    if([24,48,100].includes(saved.fxBudget))renderer.settings.fxBudget=saved.fxBudget;
     if(typeof saved.tethered==='boolean')input.tethered=saved.tethered;$('#tethered').checked=input.tethered;
     if(typeof saved.endless==='boolean')endless=saved.endless;$('#flight-mode').value=endless?'orbit':'campaign';
     audio.setMusicSource(saved.musicSource==='chip'?'chip':'desktop');$('#music-source').value=audio.musicSource;
@@ -120,6 +125,7 @@ async function boot(){
     if(Number.isFinite(saved.music)){audio.music=clamp(saved.music,0,1);$('#music-volume').value=audio.music;}if(Number.isFinite(saved.sfx)){audio.sfx=clamp(saved.sfx,0,1);$('#sfx-volume').value=audio.sfx;}
     if(typeof saved.vibration==='boolean')$('#vibration').checked=saved.vibration;if([0,1,2].includes(saved.difficulty)){difficulty=saved.difficulty;$('#difficulty').value=difficulty;}
   }}catch{}
+  syncGraphics();
   function resizeWorld(){renderer.resize();const v=renderer.viewport;$('#native-instruments').style.transform=`translate(${v.x}px,${v.y}px) scale(${v.width/1920})`;}
   const resize=new ResizeObserver(resizeWorld);resize.observe($('#viewport'));resizeWorld();
   function refreshLobby(){
@@ -186,7 +192,7 @@ async function boot(){
     control:()=>({tethered:input.tethered,input:input.read(world,myId,false,ready),dragPointer:input.dragPointer}),
     scenario:options=>{if(mode==='guest')throw new Error('Host authority only');if(options.phase)world.phase=options.phase;if(options.credits!==undefined)world.credits=options.credits;
       if(options.unlocked)world.unlocked=options.unlocked;if(options.sectorTime!==undefined)world.sectorTime=options.sectorTime;if(options.bossStage!==undefined)world.bossStage=options.bossStage;
-      if(options.enemies!==undefined)world.enemies=structuredClone(options.enemies);if(options.pickups!==undefined)world.pickups=structuredClone(options.pickups);if(options.orbit!==undefined)world.orbit=options.orbit;if(options.sector!==undefined)world.sector=options.sector;if(options.level)world.players.forEach(p=>{p.level=options.level;p.health=p.maxHealth=100;p.invuln=1000;});network.broadcast(true);},
+      if(options.enemies!==undefined)world.enemies=structuredClone(options.enemies);if(options.shots!==undefined)world.shots=structuredClone(options.shots);if(options.fx!==undefined)world.fx=structuredClone(options.fx);if(options.pickups!==undefined)world.pickups=structuredClone(options.pickups);if(options.orbit!==undefined)world.orbit=options.orbit;if(options.sector!==undefined)world.sector=options.sector;if(options.level)world.players.forEach(p=>{p.level=options.level;p.health=p.maxHealth=100;p.invuln=1000;});network.broadcast(true);},
     renderFrame:()=>renderer.render(world,myId),version:'dev-only'};
   function simulationTick(){
     const now=performance.now(),dt=Math.min(.1,(now-previousSimulation)/1000);previousSimulation=now;phone.tick();

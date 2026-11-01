@@ -54,4 +54,4 @@
 
 ## Kiadási szabály
 
-A fejlesztői verziókhoz továbbra is **inkrementális PATCH ZIP**: kizárólag új vagy ténylegesen módosult fájlok az eredeti könyvtárszerkezetben, kicsomagolás a meglévő projektmappára. A teljes ZIP csak archívum/release mentéshez.
+A fejlesztés közvetlenül a verziózott forrásban történik. A kiadás commitból, ellenőrzött builddel és CI-folyamattal készül; köztes forráscsomagok és kézi kicsomagolási lépések nélkül.

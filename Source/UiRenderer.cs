@@ -31,7 +31,7 @@ internal sealed partial class UiRenderer
         _atlas=atlas ?? throw new ArgumentNullException(nameof(atlas));
         _pixel=pixel ?? throw new ArgumentNullException(nameof(pixel));
         if(_atlas.Width != GlyphCellWidth*16 || _atlas.Height != GlyphCellHeight*6)
-            throw new ArgumentException("The installed ui_atlas.png does not match the new font renderer. Install the entire Alpha 0.9.2.3 patch.");
+            throw new ArgumentException("The installed ui_atlas.png does not match the font renderer. Build with the matching assets from the current source tree.");
     }
 
     private static int GlyphIndex(char c)

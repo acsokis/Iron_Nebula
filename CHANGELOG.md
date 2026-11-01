@@ -4,6 +4,14 @@ A projekthez tartozó kiadástörténet 2026. október 28-i állapot szerint. A 
 
 ## Browser 0.9.14 - Endless Orbit / native visual assets
 
+- Correct enemy and background mirroring using texture coordinates; use sharper
+  parallax asteroid art and faster near layers.
+- Batch projectiles and smoke as WebGL 2 instanced GPU quads; add Performance,
+  Balanced and High presets without hiding hostile bullets. GTX 10xx is a target,
+  not a hardware benchmark claim.
+- Remove obsolete packaging instructions, patch history/readmes and helper scripts;
+  development now edits the Git source directly.
+
 - Add endless sector loops, randomized run seeds, per-run upgrades and rotating
   boss fan/ring patterns with a deliberate escape lane.
 - Scroll the original celestial backgrounds continuously with mirrored tiling

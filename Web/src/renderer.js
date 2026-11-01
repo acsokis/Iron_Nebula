@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {WIDTH,HEIGHT,COLORS,SECTORS,WEAPONS} from './world.js';
 import {HdrPresenter} from './hdr.js';
 import {orbitTiles,wrap} from './orbit.js';
+import {GpuSprites} from './gpu-sprites.js';
 
 const vertex=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
 const lighting=`precision highp float;
@@ -42,10 +43,11 @@ export class Renderer{
     this.context=this.renderer.getContext();if(!(this.context instanceof WebGL2RenderingContext))throw new Error('WebGL 2 is required.');
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.setClearColor('#030715');
     this.scene=new THREE.Scene();this.camera=new THREE.OrthographicCamera(0,WIDTH,HEIGHT,0,-100,100);this.camera.position.z=10;
+    this.gpuSprites=new GpuSprites(this.scene);
     this.postScene=new THREE.Scene();this.postCamera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
     this.quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));this.postScene.add(this.quad);
-    this.pool=new Map();this.textures={};this.frame=0;this.frames=new Map();
-    this.settings={lighting:true,gi:true,shadows:true,bloom:.8,fog:.38,ambient:.56,quality:1,hdr:true};
+    this.pool=new Map();this.textures={};this.frame=0;this.frames=new Map();this.mirrors=new Map();
+    this.settings={lighting:true,gi:true,shadows:false,bloom:.65,fog:.28,ambient:.56,quality:.75,hdr:true,fxBudget:48,profile:'balanced'};
     const target=(w,h)=>new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:false});
     // Half-float targets preserve emissive energy before bloom and radiance diffusion.
     this.hdr=!!this.context.getExtension('EXT_color_buffer_float');
@@ -74,6 +76,7 @@ export class Renderer{
     this.renderer.setPixelRatio(ratio);this.renderer.setSize(Math.max(1,box.width),Math.max(1,box.height),false);
     const fit=Math.min(box.width/1920,box.height/1080);this.viewport={x:(box.width-1920*fit)/2,y:(box.height-1080*fit)/2,width:1920*fit,height:1080*fit};
     this.base.setSize(Math.max(640,Math.round(this.viewport.width*ratio)),Math.max(360,Math.round(this.viewport.height*ratio)));}
+  preset(name){const presets={performance:{quality:.5,fxBudget:24,gi:false,shadows:false,bloom:.4,fog:.16},balanced:{quality:.75,fxBudget:48,gi:true,shadows:false,bloom:.65,fog:.28},high:{quality:1,fxBudget:100,gi:true,shadows:true,bloom:.8,fog:.38}};if(!presets[name])return;Object.assign(this.settings,presets[name],{profile:name});this.resize();}
   setHdrLighting(enabled){this.settings.hdr=!!enabled&&this.hdr;
     if(!this.settings.hdr)this.presenter.disable();
     for(const target of [this.base,this.light,this.giA,this.giB,this.bloomA,this.bloomB]){target.dispose();target.texture.type=this.settings.hdr?THREE.HalfFloatType:THREE.UnsignedByteType;}
@@ -91,26 +94,27 @@ export class Renderer{
     s.position.set(x,HEIGHT-y,z);s.scale.set(width,height,1);s.renderOrder=z;return s;
   }
   object(key,textureKey,x,y,width,color='#ffffff',rotation=0,z=1){const meta=this.manifest.assets[textureKey];if(meta)this.sprite(key,this.textures[textureKey],x,y,width,width*meta.height/meta.width,color,rotation,z);}
+  oriented(art,flip=false){if(!flip)return this.textures[art];if(!this.mirrors.has(art)){const texture=this.textures[art].clone();texture.repeat.x=-1;texture.offset.x=1;texture.needsUpdate=true;this.mirrors.set(art,texture);}return this.mirrors.get(art);}
   native(key,art,x,y,scale,color='#ffffff',rotation=0,z=1,flip=false,opacity=1,origin=null){
     const meta=this.manifest.assets[art];if(!meta)return;const width=meta.sourceWidth*scale,height=meta.sourceHeight*scale;
-    const sprite=this.sprite(key,this.textures[art],x,y,width,height,color,rotation,z,opacity);
-    sprite.scale.x=flip?-width:width;sprite.center.set(origin?origin[0]/meta.sourceWidth:.5,origin?1-origin[1]/meta.sourceHeight:.5);return sprite;
+    const sprite=this.sprite(key,this.oriented(art,flip),x,y,width,height,color,rotation,z,opacity);
+    sprite.center.set(origin?(flip?1-origin[0]/meta.sourceWidth:origin[0]/meta.sourceWidth):.5,origin?1-origin[1]/meta.sourceHeight:.5);return sprite;
   }
   frameTexture(art,frame,columns,rows){const key=`${art}:${frame}`;if(!this.frames.has(key)){const texture=this.textures[art].clone();texture.repeat.set(1/columns,1/rows);texture.offset.set((frame%columns)/columns,1-(Math.floor(frame/columns)+1)/rows);texture.needsUpdate=true;this.frames.set(key,texture);}return this.frames.get(key);}
   pass(material,target){this.quad.material=material;this.renderer.setRenderTarget(target);
     if(target===null){const box=this.canvas.getBoundingClientRect();this.renderer.setViewport(0,0,box.width,box.height);this.renderer.clear();const v=this.viewport;this.renderer.setViewport(v.x,v.y,v.width,v.height);}
     this.renderer.render(this.postScene,this.postCamera);}
   render(w,localId=0){
-    this.frame++;for(const e of this.pool.values())e.sprite.visible=false;
+    this.frame++;for(const e of this.pool.values())e.sprite.visible=false;this.gpuSprites.begin();
     const sector=SECTORS[w.sector-1]??SECTORS[0],pilot=w.players.find(p=>p.id===localId),orbit=orbitTiles(w.time,pilot);
     this.orbitView=orbit.camera;
-    for(const [i,tile] of orbit.tiles.entries()){const sprite=this.sprite(`background${i}`,this.textures[sector.background],tile.x,tile.y,WIDTH,HEIGHT+100,'#ffffff',0,-20);sprite.scale.x=(tile.mirror?-1:1)*WIDTH;}
+    for(const [i,tile] of orbit.tiles.entries())this.sprite(`background${i}`,this.oriented(sector.background,tile.mirror),tile.x,tile.y,WIDTH,HEIGHT+100,'#ffffff',0,-20);
     // Independent depth layers orbit past the painted celestial body. These
     // rocks are scenery only; collidable hazards are rendered separately.
     for(let layer=0;layer<3;layer++)for(let i=0;i<4;i++){
-      const depth=layer+1,speed=24+depth*23,x=wrap(i*389+layer*137-w.time*speed,2500)-290;
+      const depth=layer+1,speed=[35,140,340][layer],x=wrap(i*389+layer*137-w.time*speed,2500)-290;
       const y=wrap(i*263+layer*151,1120)-20-orbit.camera.y*depth;
-      this.object(`parallax${layer}-${i}`,['dofFar','dofMid','dofNear'][layer],x,y,45+depth*31+i%3*12,'#ffffff',i*.8+w.time*.008,-13+layer);
+      this.object(`parallax${layer}-${i}`,i%2?'rock':'rock2',x,y,40+depth*28+i%3*12,['#788b9c','#b4c2d0','#ffffff'][layer],i*.8+w.time*.008,-13+layer);
     }
     for(let i=0;i<55;i++){const x=((i*383.1-w.time*(18+i%4*13))%2200+2200)%2200-140,y=165+(i*173.23)%800;
       this.sprite(`star${i}`,this.glow,x,y,i%7===0?8:3,i%7===0?8:3,'#b8e5ff',0,-15,.65);}
@@ -118,7 +122,7 @@ export class Renderer{
     for(const e of w.enemies){let texture=e.kind==='boss'?(w.sector===1?(e.bossType===1?'warden':'sentinel'):w.sector===2?(e.bossType===1?'riftGuardian':'riftBoss'):(e.bossType===1?'infernoGuardian':'infernoBoss')):
         w.sector===3?'infernoEnemy':w.sector===2?(e.kind==='heavy'?'heavy':e.kind==='scout'?'dart':'wisp'):e.kind;
       const scale=e.kind==='boss'?(w.sector===1?(e.bossType===1?.83:1)*.82:w.sector===2?(e.bossType===1?.48:.54):.5):w.sector===1?({heavy:.5,interceptor:.42,scout:.41}[e.kind])*.82:w.sector===2?.32*.82:.62*.82;
-      this.native(`enemy${e.id}`,texture,e.x,e.y,scale,'#ffffff',Math.sin(e.age)*.025,2,w.sector===1&&(e.kind!=='boss'||e.bossType===1));
+      this.native(`enemy${e.id}`,texture,e.x,e.y,scale,'#ffffff',Math.sin(e.age)*.025,2,['scout','interceptor','heavy','warden'].includes(texture));
     }
     for(const p of w.players){if(p.lives<=0)continue;
       const roll=p.vy/550*.08,scale=.26*.82,plume=this.manifest.assets.plume;
@@ -132,18 +136,18 @@ export class Renderer{
         this.native(`muzzle${p.id}`,'beamMuzzle',p.x+80,p.y,.7+p.level*.04,'#ffffff',0,4,false,pulse);
         this.sprite(`beamGlow${p.id}`,this.glow,p.x+80+width/2,p.y,width,45,WEAPONS[4].color,0,2,.3);}
     }
-    for(const s of w.shots){const angle=Math.atan2(s.vy,s.vx);if(s.friendly){const art=['pulse','lance','arc','gatling'][s.weapon]??'pulse',meta=this.manifest.assets[art];this.native(`shot${s.id}`,art,s.x,s.y,[.54,.59,.51,.36][s.weapon]??.54,'#ffffff',angle,5,false,1,[meta.sourceWidth*.6,meta.sourceHeight*.5]);}
-      else{const width=Math.max(.75,Math.min(1.55,s.radius/10));this.sprite(`shotEdge${s.id}`,this.white,s.x,s.y,43,width*10,'#030917',angle,4.8,.8);this.sprite(`shot${s.id}`,this.white,s.x,s.y,43,width*5.3,s.color,angle,5,.93);this.sprite(`shotCore${s.id}`,this.white,s.x,s.y,21,width*1.9,'#ffffff',angle,5.1,.95);}}
+    for(const s of w.shots){const rotation=Math.atan2(s.vy,s.vx);if(s.friendly){const art=['pulse','lance','arc','gatling'][s.weapon]??'pulse',meta=this.manifest.assets[art],scale=[.54,.59,.51,.36][s.weapon]??.54;this.gpuSprites.add(art,this.textures[art],{x:s.x,y:s.y,width:meta.sourceWidth*scale,height:meta.sourceHeight*scale,rotation,anchor:.6});}
+      else{const width=Math.max(.75,Math.min(1.55,s.radius/10));for(const [length,height,color,opacity]of [[43,width*10,'#030917',.8],[43,width*5.3,s.color,.93],[21,width*1.9,'#ffffff',.95]])this.gpuSprites.add('enemyShots',this.white,{x:s.x,y:s.y,width:length,height,rotation,color,opacity},1800);}}
     for(const p of w.pickups){const color={credits:'#ffd483',weapon:'#91f1ff',shield:'#71baff',repair:'#a0ffa9',drone:'#ceaeff'}[p.type];
       const art={credits:'pickupCredits',weapon:'pickupWeapon',shield:'pickupShield',repair:'pickupRepair',drone:'pickupDrone'}[p.type];
       this.sprite(`pickupGlow${p.id}`,this.glow,p.x,p.y,112,112,color,0,4,.3);this.object(`pickup${p.id}`,art,p.x,p.y+Math.sin(w.time*3+p.id)*4,94*(1+.08*Math.sin(w.time*6.4+p.id)),'#ffffff',0,5);}
-    for(const f of w.fx){const t=1-f.age/f.life;if(f.type==='explosion'){
+    for(const f of w.fx.slice(-this.settings.fxBudget)){const t=1-f.age/f.life;if(f.type==='explosion'){
         const frame=Math.min(7,Math.floor(f.age/.075));if(f.age<.6)this.sprite(`fx${f.id}`,this.frameTexture('explosion',frame,4,2),f.x,f.y,f.size*2,f.size*2,'#fff0e4',f.id*.7,6,Math.min(1,(1-f.age/.6)*3));
-        this.sprite(`smoke${f.id}`,this.frameTexture('damageSmoke',(f.id%3)+Math.min(3,Math.floor(f.age*3))*3,3,4),f.x-25*f.age,f.y-40*f.age,f.size*(.8+f.age),f.size*(.8+f.age),'#ffffff',f.id*.7+f.age*.12,5,t*.55);
+        this.gpuSprites.add('smoke',this.textures.damageSmoke,{x:f.x,y:f.y,width:f.size,height:f.size,rotation:f.id*.7+f.age*.12,opacity:t*.55,frame:(f.id%3)+Math.min(3,Math.floor(f.age*3))*3,columns:3,rows:4,smokeAge:f.age,z:5},100);
       }else if(f.type==='impact'){const weapon=pilot?.weapon??0,art=['impactPulse','impactLance','impactArc','impactGatling','impactBeam'][weapon];this.object(`fx${f.id}`,art,f.x,f.y,Math.max(45,f.size*1.5),'#ffffff',0,6);}
       else this.sprite(`fx${f.id}`,this.glow,f.x,f.y,f.size*(2-t),f.size*(2-t),f.color,0,6,t);}
-    if(w.phase!=='lobby')this.sprite('cockpit',this.textures.cockpit,960,66,1920,132,'#ffffff',0,9);
-    this.renderer.setRenderTarget(this.base);this.renderer.render(this.scene,this.camera);
+    this.gpuSprites.end();if(w.phase!=='lobby')this.sprite('cockpit',this.textures.cockpit,960,66,1920,132,'#ffffff',0,9);
+    this.renderer.setRenderTarget(this.base);this.renderer.render(this.scene,this.camera);this.sceneDrawCalls=this.renderer.info.render.calls;
     const lights=[];const add=(x,y,r,intensity,color)=>{if(lights.length<24)lights.push({x,y,r,intensity,color});};
     for(const f of w.fx.slice(-6))add(f.x,f.y,Math.max(100,f.size*3),2*(f.type==='explosion'?Math.exp(-f.age*7):1-f.age/f.life),f.color);
     for(const p of w.players.filter(p=>p.lives>0)){add(p.x-70,p.y,210,.85,COLORS[p.id]);if(p.beam){add(p.x+180,p.y,260,1.7,WEAPONS[4].color);add(p.beamEnd,p.y,200,1.8,WEAPONS[4].color);}}
@@ -163,7 +167,7 @@ export class Renderer{
     else this.pass(this.finalMaterial,null);
     if(this.frame%120===0)for(const [key,e]of this.pool)if(this.frame-e.last>120){this.scene.remove(e.sprite);e.sprite.material.dispose();this.pool.delete(key);}
   }
-  diagnostics(){return {webgl:this.context.getParameter(this.context.VERSION),orbit:this.orbitView,pickupSize:94,hdrAvailable:this.hdr,hdrLighting:this.settings.hdr,hdrDisplay:this.presenter.enabled,
+  diagnostics(){return {webgl:this.context.getParameter(this.context.VERSION),gpuFx:this.gpuSprites.diagnostics(),sceneDrawCalls:this.sceneDrawCalls,profile:this.settings.profile,fxBudget:this.settings.fxBudget,orbit:this.orbitView,pickupSize:94,hdrAvailable:this.hdr,hdrLighting:this.settings.hdr,hdrDisplay:this.presenter.enabled,
     hdrDisplayAvailable:!!navigator.gpu&&this.presenter.display.matches,gi:'2D screen-space radiance diffusion',giEnabled:this.settings.gi,lightingEnabled:this.settings.lighting,
     drawCalls:this.renderer.info.render.calls,textures:this.renderer.info.memory.textures};}
 }

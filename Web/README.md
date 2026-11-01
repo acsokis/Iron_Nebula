@@ -132,7 +132,10 @@ adaptation now use the same side-view player, original pickups, cockpit,
 engine plume, damage layers and explosion/impact art. The browser keeps its
 own responsive menu layout and WebGL postprocessing; pixel-identical output
 across DirectX and browser displays has not been certified. Backgrounds use
-continuous mirrored tiles with three independent parallax/DOF depths.
+continuous mirrored tiles with three independent parallax depths. Decorative
+asteroids now use sharp source art; far/mid/near drift at 35/140/340 world units
+per second. Texture-coordinate mirroring keeps enemy noses toward the player
+and makes the mirrored background edges meet correctly.
 Tethered pointer flight is on by default and can be disabled in Settings.
 Finger dragging captures the touch pointer and follows continuously without
 page scrolling; physical iOS/Android validation remains separate from the
@@ -141,3 +144,20 @@ automated Chromium touch-event checks.
 The native game and browser
 adaptation share artwork and design but are not asserted to be perfectly identical
 in every spawn pattern, balance value or boss phase.
+
+## GPU rendering and GTX 10xx target
+
+The web renderer uses WebGL 2 instanced quads for projectiles and a smoke atlas.
+Billboard transforms, smoke drift/expansion, sampling and blending execute on the
+GPU. Collision and multiplayer authority stay in the CPU simulation. The game is
+2.5D: 2D gameplay with layered depth, parallax and GPU effects, not a full 3D model port.
+
+Balanced is the default preset: 75% render scale, 48 visual effects, GI enabled,
+soft shadows disabled. Performance uses 50%, 24 visual effects and disables GI;
+High uses 100%, 100 effects and soft shadows. Presets never remove hostile bullets.
+GTX 10xx is a target class, not a measured minimum or a guaranteed frame rate.
+No mandatory WebGPU, compute shaders or ray tracing is used for this path.
+
+The native Windows edition already renders its projectile/smoke sprites through
+MonoGame's DirectX SpriteBatch and layered parallax. F6 toggles its DOF layer;
+F7/F8 control combat/weapon effects. Physical GTX 10xx benchmarking remains pending.
