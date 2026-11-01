@@ -167,8 +167,8 @@ public sealed partial class IronNebulaGame
             EnemyKind.InfernoGuardian=>.68f,
             _=>.48f
         };
-        _batch.Draw(sprite,artPos,null,tint,0f,
-            new Vector2(sprite.Width*.5f,sprite.Height*.5f),scale,SpriteEffects.None,0f);
+        _voxelVisuals.Draw(_batch,enemy.VisualId,sprite,artPos,tint,0f,
+            new Vector2(sprite.Width*.5f,sprite.Height*.5f),scale,SpriteEffects.None,enemy.Health/(float)Math.Max(1,enemy.MaxHealth));
         float lost=1f-enemy.Health/(float)Math.Max(1,enemy.MaxHealth);
         if(lost>.35f && enemy.Kind!=EnemyKind.InfernoBossTurret)
             _batch.Draw(_redGlow,artPos+new Vector2(4,3),null,

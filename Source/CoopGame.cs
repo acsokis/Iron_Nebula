@@ -266,6 +266,7 @@ public sealed partial class IronNebulaGame
     }
     private void SimulateCoop(float dt,CoopInput local,CoopSeat[] seats)
     {
+        var previousSolidPositions=CaptureNativeBodies();
         foreach(int id in _party.Keys.Where(id=>id!=0 && !seats.Any(s=>s.Id==id)).ToArray()) _party.Remove(id);
         _coopTick++;_elapsed+=dt;_waveClock-=dt;UpdateBackground(dt);
         _shake=Math.Max(0,_shake-dt*27);_flash=Math.Max(0,_flash-dt*3);_messageTime=Math.Max(0,_messageTime-dt);
@@ -284,7 +285,7 @@ public sealed partial class IronNebulaGame
         _pilot=living[(int)(_coopTick/180%living.Length)].Pilot;
         try
         {
-            UpdateSectorDirector(dt);UpdateDebris(dt);UpdateEnemies(dt);UpdateShots(dt);UpdateLaserLanes(dt);
+            UpdateSectorDirector(dt);UpdateDebris(dt);UpdateEnemies(dt);ResolveNativeBodies(previousSolidPositions,dt);UpdateShots(dt);UpdateLaserLanes(dt);
             UpdatePickups(dt);UpdateParticles(dt);UpdateCombatFx(dt);UpdatePrimaryImpacts(dt);UpdatePrimaryReadouts(dt);
             UpdateExplosionSprites(dt);UpdateBossBreaches(dt);UpdateDamageSmokeSprites(dt);UpdateEnemyDamageSmoke(dt);
             UpdateEnemySmokeSprites(dt);UpdateScheduledDeathBursts(dt);UpdateBossFinale(dt);UpdateShockwaves(dt);

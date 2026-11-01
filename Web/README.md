@@ -132,14 +132,28 @@ adaptation now use the same side-view player, original pickups, cockpit,
 engine plume, damage layers and explosion/impact art. The browser keeps its
 own responsive menu layout and WebGL postprocessing; pixel-identical output
 across DirectX and browser displays has not been certified. Backgrounds use
-continuous mirrored tiles with three independent parallax depths. Decorative
-asteroids now use sharp source art; far/mid/near drift at 35/140/340 world units
-per second. Texture-coordinate mirroring keeps enemy noses toward the player
-and makes the mirrored background edges meet correctly.
-The desktop background plates now use the same endless mirrored scrolling in
-all three sectors. Transparent browser sprites use lossless WebP at up to 1280
+generated periodic space plates in their original orientation, with a narrow
+edge overlap and independent parallax layers. Physical near-field asteroids,
+wrecks and stations use a separate seeded indexed stream with bounded population,
+health, collision-aware placement and swept projectile hits. Only distant
+decorative rocks are noninteractive. Enemy hulls enter from beyond the right edge.
+The desktop shares the same generated background source images in all sectors.
+Transparent browser sprites use lossless WebP at up to 1280
 pixels, preserving alpha and reducing compression fringes. Collectibles have
 consistent metal-rimmed badges, a steady 108-unit size and restrained glow.
+The loader shows streamed download bytes, preparation stages and percentage,
+preloads all three sectors and music, then uploads textures and warms shaders.
+Failures provide a retry action. The soundtrack still requires user interaction
+before playback, as required by browser audio policy.
+
+Hull and shield visual populations follow their authoritative health fractions:
+100% retains every occupied cell. Alpha-derived shields follow the ship silhouette;
+a 64-point FFT spectral wave responds to damage and regeneration. Lost visual
+cells become bounded, GPU-instanced sprite fragments. This is a 2.5D visual damage
+system, not simulated voxel fluids or a physically fractured 3D mesh.
+Solid hull capsules and swept movement prevent actor/world tunneling. Players
+exclude other players from contact. Bounded flight paths check the complete body
+corridor; the current game has flying ships, no ground walking or jump abilities.
 Tethered pointer flight is on by default and can be disabled in Settings.
 Finger dragging captures the touch pointer and follows continuously without
 page scrolling; physical iOS/Android validation remains separate from the

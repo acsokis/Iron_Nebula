@@ -490,6 +490,36 @@
       "sourceHeight": 256,
       "bytes": 33586,
       "sha256": "e77168497ca8c102a9e1a804e4905b311ea3e1b260ed867cdf4fc89ba15a6ced"
+    },
+    "spaceFrontier": {
+      "file": "spaceFrontier.webp",
+      "source": "Space/frontier.png",
+      "width": 1672,
+      "height": 941,
+      "sourceWidth": 1672,
+      "sourceHeight": 941,
+      "bytes": 312224,
+      "sha256": "5c80b11e7ac5b535152e39c087c2e2783fd899830bf72a0b0acde543f3b07a44"
+    },
+    "spaceRift": {
+      "file": "spaceRift.webp",
+      "source": "Space/rift.png",
+      "width": 1672,
+      "height": 941,
+      "sourceWidth": 1672,
+      "sourceHeight": 941,
+      "bytes": 194542,
+      "sha256": "1ba8cc296663b3436a802a12cef378c8b8af8fd00df5315c6d2dd0840f24aa3d"
+    },
+    "spaceInferno": {
+      "file": "spaceInferno.webp",
+      "source": "Space/inferno.png",
+      "width": 1672,
+      "height": 941,
+      "sourceWidth": 1672,
+      "sourceHeight": 941,
+      "bytes": 264768,
+      "sha256": "b89001a6026e35695e6e0f692bab257f9394ea11bfe333dad7786a3480150e71"
     }
   }
 }

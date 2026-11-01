@@ -1,6 +1,8 @@
 import './style.css';
 import './phone.css';
 import './native.css';
+import './loading.css';
+import {LoadingScreen} from './preload.js';
 import {Renderer} from './renderer.js';
 import {NativeHud} from './native-hud.js';
 import {Input,icon} from './input.js';
@@ -11,17 +13,22 @@ import {cleanCode,cleanName,validIceServers} from './protocol.js';
 import {createWorld,addPlayer,startRun,stepWorld,neutralInput,validSnapshot,migrateSoloSave,buyUpgrade,SHOP,COLORS,SECTORS,WEAPONS,clamp} from './world.js';
 
 const $=selector=>document.querySelector(selector),params=new URLSearchParams(location.search);
+const loading=new LoadingScreen();
 const toast=message=>{const element=$('#toast');element.textContent=String(message).slice(0,240);element.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>element.hidden=true,6500);};
 const code=params.get('controller');
 if(code){
   const url=new URL(location.href);url.searchParams.delete('controller');history.replaceState(null,'',url);
   runPhone(code).catch(error=>{$('#loading').hidden=true;$('#desktop').hidden=true;$('#phone-mode').hidden=false;$('[data-phone-status]').textContent=error.message;});
-}else boot().catch(error=>{$('#loading-label').textContent='Flight computer unavailable';const detail=document.createElement('p');detail.className='muted';detail.textContent=error.message;$('#loading-label').after(detail);console.error(error);});
+}else boot().catch(error=>{loading.fail(error);console.error(error);});
 
 async function boot(){
+  loading.update('manifest',0,'Checking the game asset manifest');
   const canvas=$('#game'),manifest=await fetch(new URL('./assets/manifest.json',document.baseURI)).then(r=>{if(!r.ok)throw new Error('Game textures could not be loaded. Serve this game over HTTP(S).');return r.json();});
   const renderer=new Renderer(canvas,manifest),audio=new AudioEngine();
-  await renderer.load(progress=>$('#loading-progress').value=progress);
+  loading.update('manifest',1,'Connected');
+  await renderer.load((progress,detail)=>loading.update('textures',progress,`${detail.completed} / ${detail.count} textures · ${detail.asset}`,detail));
+  const musicBytes=5803893;loading.update('audio',0,'Downloading audio before flight');
+  await audio.preload(bytes=>loading.update('audio',bytes/musicBytes,'Original desktop soundtrack',{loaded:bytes,total:musicBytes})).catch(()=>{$('#loading-note').textContent='Music could not preload. Flight is available; use Sound or select chiptune in Settings to retry.';});
   const nativeHud=new NativeHud($('#native-instruments'),renderer.textures.uiAtlas.image);
   let world=createWorld(),myId=0,mode='solo',overlay='menu',ready=false,difficulty=1,endless=true;const overlayStack=[];
   let focused=0,lastPhase='lobby',inputSent=0,lastUi=0,lastHurt=0,lastSave=0,iceServers;
@@ -184,13 +191,16 @@ async function boot(){
     else if(name==='confirm'){const control=controls[focused];if(control?.type==='checkbox')control.click();else if(control?.tagName==='BUTTON')control.click();else control?.focus();}
   }
   if(params.get('room')){$('#join-code').value=cleanCode(params.get('room'))??'';overlayStack.push('menu');show('join');}
-  $('#loading').hidden=true;updateUi();
+  loading.update('graphics',0,'Uploading textures and preparing shaders');
+  await renderer.prepare(world,progress=>loading.update('graphics',progress,'Preparing lighting, shields and postprocessing'));
+  await loading.finish();updateUi();
   const qa=import.meta.env.DEV&&params.get('test')==='1';
   if(qa)window.__IRON_NEBULA__={state:()=>structuredClone(world),network:()=>network.diagnostics(),renderer:()=>renderer.diagnostics(),profile:()=>input.profile,
     drive:value=>{scriptedInput=value;},audio:()=>({state:audio.context?.state??'locked',enabled:audio.enabled,sfx:audio.sfx,music:audio.music,source:audio.musicSource,desktopPlaying:!!audio.desktop&&!audio.desktop.paused,desktopTime:audio.desktop?.currentTime??0,desktopFailed:!!audio.desktopFailed}),
     phone:()=>({paired:!!phone.connection?.open,code:phone.code,input:structuredClone(input.phone.input)}),
     control:()=>({tethered:input.tethered,input:input.read(world,myId,false,ready),dragPointer:input.dragPointer,padButtons:[...input.oldPadButtons]}),
     scenario:options=>{if(mode==='guest')throw new Error('Host authority only');if(options.phase)world.phase=options.phase;if(options.credits!==undefined)world.credits=options.credits;
+      if(options.damageState){const p=world.players.find(p=>p.id===myId);p.health=clamp(options.damageState.health??p.health,0,p.maxHealth);p.shield=clamp(options.damageState.shield??p.shield,0,p.maxShield);p.invuln=1000;}
       if(options.unlocked)world.unlocked=options.unlocked;if(options.sectorTime!==undefined)world.sectorTime=options.sectorTime;if(options.bossStage!==undefined)world.bossStage=options.bossStage;
       if(options.enemies!==undefined)world.enemies=structuredClone(options.enemies);if(options.shots!==undefined)world.shots=structuredClone(options.shots);if(options.fx!==undefined)world.fx=structuredClone(options.fx);if(options.pickups!==undefined)world.pickups=structuredClone(options.pickups);if(options.orbit!==undefined)world.orbit=options.orbit;if(options.sector!==undefined)world.sector=options.sector;if(options.level)world.players.forEach(p=>{p.level=options.level;p.health=p.maxHealth=100;p.invuln=1000;});network.broadcast(true);},
     renderFrame:()=>renderer.render(world,myId),version:'dev-only'};

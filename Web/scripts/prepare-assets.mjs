@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve, relative } from 'node:path';
+import {spawnSync} from 'node:child_process';
 const source=resolve(process.argv[2] ?? '../Assets');
 const destination=resolve('public/assets');
 await mkdir(destination,{recursive:true});
@@ -37,3 +38,4 @@ for(const [key,name] of Object.entries(files)){
 }
 await writeFile(resolve(destination,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 console.log(`Prepared ${Object.keys(files).length} original-game web textures in ${relative(process.cwd(),destination)}; no soundtrack included.`);
+const space=spawnSync(process.execPath,['scripts/prepare-space-assets.mjs'],{stdio:'inherit'});if(space.status!==0)process.exit(space.status??1);

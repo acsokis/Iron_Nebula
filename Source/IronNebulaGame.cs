@@ -11,6 +11,7 @@ public sealed partial class IronNebulaGame : Game
 {
     public const int ViewWidth=1920, ViewHeight=1080;
     private readonly GraphicsDeviceManager _graphics;
+    private readonly VoxelVisuals _voxelVisuals=new();
     private SpriteBatch _batch = null!;
     private RenderTarget2D _scene = null!;
     private RenderTarget2D? _hitBlurTarget;
@@ -18,6 +19,7 @@ public sealed partial class IronNebulaGame : Game
     private Texture2D _sentinel=null!, _logo=null!;
     // Alpha 0.5: side-view player refit with true roll-style banking around a custom hull origin.
     private Texture2D _hdPlayer=null!, _hdPlayerPlume=null!, _hdBackdrop=null!;
+    private readonly Texture2D[] _spaceBackdrops=new Texture2D[3];
     // Sector 02: independent alien fleet, clean Rift backdrop and two boss encounters.
     private Texture2D _riftCleanBackdrop=null!;
     private Texture2D _cockpitHud=null!;
@@ -169,6 +171,7 @@ public sealed partial class IronNebulaGame : Game
         _pixel=new Texture2D(GraphicsDevice,1,1);
         _pixel.SetData(new[]{Color.White});
         _hdBackdrop=LoadImage("HD/outer_frontier_cinematic.png");
+        for(int i=0;i<3;i++)_spaceBackdrops[i]=LoadImage("Space/"+new[]{"frontier","rift","inferno"}[i]+".png");
         _riftCleanBackdrop=LoadImage("Rift/rift_clean_075.png");
         LoadInfernoContent();
         _cockpitHud=LoadImage("FX/cockpit_hud_slim_075.png");
@@ -1057,6 +1060,7 @@ private void DrawShop()
 
     private void UpdatePlaying(float dt, KeyboardState keys)
     {
+        var previousSolidPositions=CaptureNativeBodies();
         _elapsed+=dt; _waveClock-=dt;
         UpdateBackground(dt);
         _shake=Math.Max(0,_shake-dt*27);
@@ -1166,6 +1170,7 @@ private void DrawShop()
         UpdateSectorDirector(dt);
         UpdateDebris(dt);
         UpdateEnemies(dt);
+        ResolveNativeBodies(previousSolidPositions,dt);
         UpdateDrone(dt);
         UpdateShots(dt);
         if(_beamActive) UpdateContinuousBeam(dt);
@@ -3088,17 +3093,20 @@ private void DrawShop()
 
         if(_mode!=GameMode.Title)
         {
+            _voxelVisuals.Begin((float)gameTime.TotalGameTime.TotalSeconds,_mode==GameMode.Paused?0f:(float)gameTime.ElapsedGameTime.TotalSeconds);
             // Stability-first: do not inject random camera offsets into ship transforms.
             // Screen shake can return later as a separate, controlled background effect.
             Vector2 jitter=Vector2.Zero;
             _batch.Begin(blendState:BlendState.AlphaBlend,samplerState:SamplerState.LinearClamp,transformMatrix:Matrix.CreateTranslation(jitter.X,jitter.Y,0));
             DrawActors();
             DrawCoopOtherPilots();
+            _voxelVisuals.End(_batch);
             _batch.End();
             _batch.Begin(blendState:BlendState.Additive,samplerState:SamplerState.LinearClamp,transformMatrix:Matrix.CreateTranslation(jitter.X,jitter.Y,0));
             DrawLights();
             _batch.End();
         }
+        else _voxelVisuals.Clear();
         _batch.Begin(blendState:BlendState.AlphaBlend,samplerState:SamplerState.LinearClamp);
         DrawOverlay();
         DrawCoopOverlay();
@@ -3120,7 +3128,6 @@ private void DrawShop()
         if(_infernoActive)
         {
             DrawInfernoBackground();
-            if(_dofEnabled) DrawInfernoDrifters();
             return;
         }
         if(_riftActive)
@@ -3129,18 +3136,18 @@ private void DrawShop()
             float entryFade=MathHelper.Clamp(_riftFade,0f,1f);
             if(entryFade<.999f)
             {
-                DrawEndlessBackdrop(_hdBackdrop,Color.White);
+                DrawEndlessBackdrop(_spaceBackdrops[0],Color.White);
             }
             // One approved, deliberately quiet purple-green backdrop across Sector 02.
             // No bright plate swapping: important combat sprites remain distinguishable.
             // A tiny slow pan adds motion without visibly shifting the distant station.
-            DrawEndlessBackdrop(_riftCleanBackdrop,Color.White*entryFade);
+            DrawEndlessBackdrop(_spaceBackdrops[1],Color.White*entryFade);
             // Only a very faint darkening during combat. Never hide the purple/green atmosphere.
             _ui.Rect(_batch,new Rectangle(0,0,ViewWidth,ViewHeight),new Color(0,3,10,6));
         }
         else
         {
-            DrawEndlessBackdrop(_hdBackdrop,Color.White);
+            DrawEndlessBackdrop(_spaceBackdrops[0],Color.White);
             _ui.Rect(_batch,new Rectangle(0,0,ViewWidth,ViewHeight),new Color(0,7,20,65));
         }
         DrawParallaxRocks();
@@ -3149,18 +3156,22 @@ private void DrawShop()
 
     private void DrawEndlessBackdrop(Texture2D texture,Color tint)
     {
-        // Adjacent tiles sample the same painted edge. Two-tile periods retain
-        // orientation across wrapping, using the same artwork as the web game.
-        float offset=(_travel*14f)%(ViewWidth*2f);
-        int index=(int)(offset/ViewWidth);
-        float shift=offset%ViewWidth;
+        // Original-orientation periodic art, with a small overlapping fade;
+        // never reflect a planet or station across the scrolling seam.
+        float shift=(_travel*14f)%ViewWidth;
         int y=-50+(int)(MathF.Sin(_travel/95f)*22f);
         for(int i=-1;i<=1;i++)
         {
-            int left=(int)MathF.Round(i*ViewWidth-shift);
-            int right=(int)MathF.Round((i+1)*ViewWidth-shift);
-            var effects=((index+i)&1)!=0?SpriteEffects.FlipHorizontally:SpriteEffects.None;
-            _batch.Draw(texture,new Rectangle(left,y,right-left,ViewHeight+100),null,tint,0f,Vector2.Zero,effects,0f);
+            const int pictureWidth=ViewWidth+256;
+            int left=(int)MathF.Round(i*ViewWidth-shift-128),fadeSource=(int)MathF.Ceiling(texture.Width*256f/pictureWidth);
+            for(int strip=0;strip<64;strip++)
+            {
+                int sx=strip*fadeSource/64,ex=(strip+1)*fadeSource/64,dx=(int)MathF.Round(sx*pictureWidth/(float)texture.Width),end=(int)MathF.Round(ex*pictureWidth/(float)texture.Width);
+                float alpha=(strip+.5f)/64;alpha=alpha*alpha*(3-2*alpha);
+                _batch.Draw(texture,new Rectangle(left+dx,y,end-dx,ViewHeight+100),new Rectangle(sx,0,ex-sx,texture.Height),tint*alpha);
+            }
+            int solidX=(int)MathF.Round(fadeSource*pictureWidth/(float)texture.Width);
+            _batch.Draw(texture,new Rectangle(left+solidX,y,pictureWidth-solidX,ViewHeight+100),new Rectangle(fadeSource,0,texture.Width-fadeSource,texture.Height),tint);
         }
     }
 
@@ -3171,6 +3182,7 @@ private void DrawShop()
         const float wrap=ViewWidth+880f;
         foreach(RiftDrifter d in _riftDrifters)
         {
+            if(d.Layer!=0)continue; // Nearby debris belongs to the destructible world.
             Texture2D tex=_riftDrifterArt[d.Layer,d.Variant];
             float x=(d.StartX+wrap*10f-_riftElapsed*d.Speed)%wrap-360f;
             float y=d.Y+MathF.Sin(_riftElapsed*.18f+d.Phase)*(d.Layer==0?8f:13f);
@@ -3189,7 +3201,7 @@ private void DrawShop()
         // atmospheric color, edge feather and nearly opaque cores. Don't multiply
         // them by a translucent tint or overlay circular pseudo-DOF particles.
         const float wrapWidth=ViewWidth+700f;
-        for(int layer=0;layer<3;layer++)
+        for(int layer=0;layer<1;layer++)
         foreach(ParallaxRock rock in _parallaxRocks)
         {
             if(rock.DepthLayer!=layer) continue;
@@ -3272,8 +3284,9 @@ private void DrawShop()
         {
             Texture2D tex=rock.IsRiftShard?_riftHazard:_hdRocks[Math.Clamp(rock.Variant,0,_hdRocks.Length-1)];
             float scale=(rock.Radius*2f)/tex.Width;
-            _batch.Draw(tex,rock.Position,null,_infernoActive?new Color(255,176,121):Color.White,rock.Rotation,
-                new Vector2(tex.Width*.5f,tex.Height*.5f),scale,SpriteEffects.None,0);
+            int maximum=rock.IsRiftShard?(rock.Radius>56?4:3):(rock.Radius>58?4:2);
+            _voxelVisuals.Draw(_batch,rock.VisualId,tex,rock.Position,_infernoActive?new Color(255,176,121):Color.White,rock.Rotation,
+                new Vector2(tex.Width*.5f,tex.Height*.5f),scale,SpriteEffects.None,rock.Health/(float)maximum);
         }
         foreach(LaserLane lane in _laserLanes)
         {
@@ -3312,8 +3325,8 @@ private void DrawShop()
                 bool colossus=e.Kind==EnemyKind.RiftColossus;
                 Texture2D tex=guardian?_riftGuardianSprite:colossus?_riftColossusSprite:_riftBossTurretSprite;
                 float scale=guardian?.48f:colossus?.54f:.34f;
-                _batch.Draw(tex,artPos,null,shipTint,0f,
-                    new Vector2(tex.Width*.5f,tex.Height*.5f),scale,SpriteEffects.None,0f);
+                _voxelVisuals.Draw(_batch,e.VisualId,tex,artPos,shipTint,0f,
+                    new Vector2(tex.Width*.5f,tex.Height*.5f),scale,SpriteEffects.None,e.Health/(float)Math.Max(1,e.MaxHealth));
                 if(scorchAlpha>0f)
                     _batch.Draw(_purpleGlow,artPos,null,new Color(160,64,200)*(scorchAlpha*.13f),0f,
                         new Vector2(_purpleGlow.Width*.5f,_purpleGlow.Height*.5f),colossus?1.5f:.8f,SpriteEffects.None,0f);
@@ -3325,8 +3338,8 @@ private void DrawShop()
                 float visualSize=(e.Kind==EnemyKind.InfernoTank||e.Kind==EnemyKind.InfernoBomber)?.73f:.62f;
                 visualSize*=CombatZoom;
                 float banking=MathHelper.Clamp(e.Banking,-1f,1f)*.045f;
-                _batch.Draw(tex,artPos,null,shipTint,banking,
-                    new Vector2(tex.Width*.5f,tex.Height*.5f),visualSize,SpriteEffects.None,0f);
+                _voxelVisuals.Draw(_batch,e.VisualId,tex,artPos,shipTint,banking,
+                    new Vector2(tex.Width*.5f,tex.Height*.5f),visualSize,SpriteEffects.None,e.Health/(float)Math.Max(1,e.MaxHealth));
             }
             else if(IsRiftEnemy(e.Kind))
             {
@@ -3335,8 +3348,8 @@ private void DrawShop()
                 float visualSize=(e.Kind==EnemyKind.RiftMauler?.46f:e.Kind==EnemyKind.RiftPrism?.37f:.32f)*CombatZoom;
                 float bank=MathHelper.Clamp(e.Banking,-1f,1f)*.064f;
                 DrawEnemyReadabilityEdge(e,artPos,tex,visualSize,bank,SpriteEffects.None);
-                _batch.Draw(tex,artPos,null,shipTint,bank,
-                    new Vector2(tex.Width*.5f,tex.Height*.5f),visualSize,SpriteEffects.None,0f);
+                _voxelVisuals.Draw(_batch,e.VisualId,tex,artPos,shipTint,bank,
+                    new Vector2(tex.Width*.5f,tex.Height*.5f),visualSize,SpriteEffects.None,e.Health/(float)Math.Max(1,e.MaxHealth));
                 // A subtle damage glint follows the approved hit / smoke system.
                 if(scorchAlpha>0)
                     _batch.Draw(_redGlow,artPos+new Vector2(24,3),null,Color.OrangeRed*(scorchAlpha*.14f),0f,
@@ -3350,8 +3363,8 @@ private void DrawShop()
                 float scale=(e.Kind==EnemyKind.Heavy?.50f:e.Kind==EnemyKind.Interceptor?.42f:.41f)*CombatZoom;
                 float enemyPitch=MathHelper.Clamp(e.Banking,-1f,1f)*.055f;
                 DrawEnemyReadabilityEdge(e,artPos,hull,scale,enemyPitch,SpriteEffects.FlipHorizontally);
-                _batch.Draw(hull,artPos,null,shipTint,enemyPitch,
-                    new Vector2(hull.Width*.5f,hull.Height*.5f),scale,SpriteEffects.FlipHorizontally,0);
+                _voxelVisuals.Draw(_batch,e.VisualId,hull,artPos,shipTint,enemyPitch,
+                    new Vector2(hull.Width*.5f,hull.Height*.5f),scale,SpriteEffects.FlipHorizontally,e.Health/(float)Math.Max(1,e.MaxHealth));
                 // Old damage overlays belonged to the retired vector hull shapes.
                 // Keep the approved sprite smoke/hit flash rather than misaligned art.
             }
@@ -3363,7 +3376,7 @@ private void DrawShop()
                 SpriteEffects facing=e.Kind==EnemyKind.Sentinel?SpriteEffects.None:SpriteEffects.FlipHorizontally;
                 Vector2 origin=new(tex.Width*.5f,tex.Height*.5f);
                 DrawEnemyReadabilityEdge(e,artPos,tex,scale,0f,facing);
-                _batch.Draw(tex,artPos,null,shipTint,0,origin,scale,facing,0);
+                _voxelVisuals.Draw(_batch,e.VisualId,tex,artPos,shipTint,0,origin,scale,facing,e.Health/(float)Math.Max(1,e.MaxHealth));
                 // No legacy scorch hull overlay; it does not fit the new HD model.
             }
             // Every multi-hit regular enemy (including the Rift turrets) shows REAL remaining HP.
@@ -3394,20 +3407,13 @@ private void DrawShop()
             // Always show the hull: old invulnerability flashing made it disappear repeatedly.
             float invulnerabilityGlow=_pilot.Invincible>0 ? .12f+.04f*(float)Math.Sin(_travel*6f) : 0f;
             Color hullTint=Color.Lerp(Color.White,Color.LightSkyBlue,invulnerabilityGlow);
-            _batch.Draw(_hdPlayer,_pilot.Position,null,hullTint,PlayerRoll,
-                PlayerOrigin,PlayerScale,SpriteEffects.None,0);
-            int damageTier=Math.Clamp(_pilot.MaxHealth-_pilot.Health,0,_hullDamageLayers.Length);
-            if(damageTier>0)
-                _batch.Draw(_hullDamageLayers[damageTier-1],_pilot.Position,null,Color.White,PlayerRoll,
-                    PlayerOrigin,PlayerScale,SpriteEffects.None,0);
+            _voxelVisuals.Draw(_batch,"player"+(_coopClient?.Id??0),_hdPlayer,_pilot.Position,hullTint,PlayerRoll,
+                PlayerOrigin,PlayerScale,SpriteEffects.None,_pilot.Health/(float)Math.Max(1,_pilot.MaxHealth));
         }
-        if((_mode==GameMode.Playing || _mode==GameMode.Paused) && _pilot.Shield>0)
+        if((_mode==GameMode.Playing || _mode==GameMode.Paused) && _pilot.Lives>0)
         {
-            float pulse=1f+.028f*(float)Math.Sin(_travel*5.6f);
-            float intensity=.42f+.08f*_pilot.Shield;
-            _batch.Draw(_shieldShell,_pilot.Position,null,new Color(150,240,255)*(intensity*.80f),_travel*.45f,new Vector2(_shieldShell.Width/2f,_shieldShell.Height/2f),.78f*pulse*CombatZoom,SpriteEffects.None,0);
-            _batch.Draw(_shieldRing,_pilot.Position,null,new Color(60,210,255)*(intensity*.36f),-_travel*.28f,new Vector2(_shieldRing.Width/2f,_shieldRing.Height/2f),.62f*pulse*CombatZoom,SpriteEffects.None,0);
-            _batch.Draw(_blueGlow,_pilot.Position,null,new Color(70,220,255)*(.12f+.05f*_pilot.Shield),0,new Vector2(_blueGlow.Width/2f,_blueGlow.Height/2f),.40f*pulse*CombatZoom,SpriteEffects.None,0);
+            _voxelVisuals.DrawShield(_batch,"shield"+(_coopClient?.Id??0),_hdPlayer,_pilot.Position,PlayerOrigin,PlayerScale,PlayerRoll,
+                _pilot.Shield/(float)Math.Max(1,_pilot.MaxShield),new Color(130,235,255)*.85f);
         }
         if((_mode==GameMode.Playing || _mode==GameMode.Paused) && _pilot.DroneActive)
         {
@@ -4025,6 +4031,7 @@ private void DrawPauseMenu()
         StopGamePadFeedback();
         _dualSense.Dispose();
         _audio?.Dispose();_audio=null;
+        _voxelVisuals.Dispose();
         _scene?.Dispose();_pixel?.Dispose();
         base.UnloadContent();
     }

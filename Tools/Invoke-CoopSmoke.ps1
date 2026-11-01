@@ -21,7 +21,7 @@ try {
     }
     $deadline=[DateTime]::UtcNow.AddSeconds(55)
     while(@($ownedProcesses | Where-Object { !$_.HasExited }).Count -gt 0 -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 200 }
-    $reports=@(Get-ChildItem -LiteralPath $reportRoot -Filter '*.json' -File | ForEach-Object { Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json })
+    $reports=@(Get-ChildItem -LiteralPath $reportRoot -Filter '*.json' -File | Where-Object { $_.Name -notlike '*.visual.json' } | ForEach-Object { Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json })
     $after=if(Test-Path -LiteralPath $soloSave) { (Get-FileHash -LiteralPath $soloSave -Algorithm SHA256).Hash } else { 'ABSENT' }
     $success=$reports.Count -eq 6 -and @($reports | Where-Object { !$_.success }).Count -eq 0 -and $before -eq $after
     [pscustomobject]@{ Success=$success; ReportCount=$reports.Count; SoloSaveUnchanged=($before -eq $after); ReportDirectory=$reportRoot; Reports=$reports } | ConvertTo-Json -Depth 8

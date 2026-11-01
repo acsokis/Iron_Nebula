@@ -39,8 +39,15 @@ internal sealed class Pilot
     public float DroneBlockTimer;
 }
 
+internal static class VisualEntityIds
+{
+    private static int _next;
+    public static int Next()=>System.Threading.Interlocked.Increment(ref _next);
+}
+
 internal sealed class Enemy
 {
+    public int VisualId=VisualEntityIds.Next();
     public EnemyKind Kind;
     public Vector2 Position;
     public float Age;
@@ -204,6 +211,7 @@ internal sealed class Shockwave
 // Destructible environmental debris, independent of enemy waves.
 internal sealed class Debris
 {
+    public int VisualId=VisualEntityIds.Next();
     public Vector2 Position;
     public Vector2 Velocity;
     public float Radius;

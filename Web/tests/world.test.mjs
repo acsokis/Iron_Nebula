@@ -11,12 +11,12 @@ test('endless orbit wraps all sectors without losing pilots or upgrades',()=>{
   assert.equal(w.orbit,4);assert.equal(w.sector,1);assert.equal(w.players.length,6);assert.equal(w.upgrades.power,2);assert.equal(w.unlocked,31);
   w.orbit=-1;assert.equal(validSnapshot(w),false);
 });
-test('orbital background covers the viewport across mirrored wrap boundaries',()=>{
+test('orbital background covers the viewport without reflecting its artwork',()=>{
   for(const time of [0,1,137.1428,137.1429,274.2857,1e8]){
     const {tiles,camera}=orbitTiles(time,{y:950});const sorted=tiles.map(t=>[t.x-960,t.x+960]).sort((a,b)=>a[0]-b[0]);
     assert.ok(sorted[0][0]<=0);assert.ok(sorted.at(-1)[1]>=1920);assert.ok(Number.isFinite(camera.y));
     for(let i=1;i<sorted.length;i++)assert.ok(Math.abs(sorted[i][0]-sorted[i-1][1])<1e-8);
-    assert.notEqual(tiles[0].mirror,tiles[1].mirror);assert.notEqual(tiles[1].mirror,tiles[2].mirror);
+    assert.ok(tiles.every(t=>t.mirror===false));
   }
 });
 test('six seats, unique IDs and lobby-only admission',()=>{

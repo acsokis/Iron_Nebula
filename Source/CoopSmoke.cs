@@ -54,6 +54,8 @@ public sealed partial class IronNebulaGame
         if(_coopSmokeTicks==640) BeginInfernoSector();
         if(_coopSmokeTicks==720) SpawnInfernoBoss(false);
         if(_coopSmokeTicks==180) foreach(var actor in _party.Values) UsePartyPilot(actor,()=> { _pilot.Invincible=0;HurtPilot(); });
+        if(_coopSmokeTicks==240) foreach(var actor in _party.Values) { actor.Pilot.Health=actor.Pilot.MaxHealth/2;actor.Pilot.Shield=1; }
+        if(_coopSmokeTicks==300) foreach(var actor in _party.Values) { actor.Pilot.Health=actor.Pilot.MaxHealth;actor.Pilot.Shield=actor.Pilot.MaxShield; }
         foreach(var actor in _party.Values)
         {
             if(_coopSmokeTicks%120==1) actor.Pilot.PrimaryMode=(PrimaryWeaponMode)((_coopSmokeTicks/120+actor.Id)%5);
@@ -103,6 +105,7 @@ public sealed partial class IronNebulaGame
         if(_coopSmoke && _coopTick<250) return;
         using var image=File.Create(_coopSmokeLog+".png");
         _scene.SaveAsPng(image,ViewWidth,ViewHeight);_coopVisualCaptured=true;
+        File.WriteAllText(_coopSmokeLog+".visual.json",JsonSerializer.Serialize(_voxelVisuals.Diagnostics));
     }
 }
 

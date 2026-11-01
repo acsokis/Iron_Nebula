@@ -25,10 +25,10 @@ public sealed partial class IronNebulaGame
             }
             if(actor.Id!=local)
             {
-                _batch.Draw(_hdPlayer,position,null,Color.Lerp(Color.White,color,.28f),actor.Bank*MaxPilotRoll,
-                    PlayerOrigin,PlayerScale,SpriteEffects.None,0);
-                if(actor.Pilot.Shield>0) _batch.Draw(_shieldRing,position,null,color*.55f,0,
-                    new Vector2(_shieldRing.Width/2f,_shieldRing.Height/2f),.62f*CombatZoom,SpriteEffects.None,0);
+                _voxelVisuals.Draw(_batch,"player"+actor.Id,_hdPlayer,position,Color.Lerp(Color.White,color,.28f),actor.Bank*MaxPilotRoll,
+                    PlayerOrigin,PlayerScale,SpriteEffects.None,actor.Pilot.Health/(float)Math.Max(1,actor.Pilot.MaxHealth));
+                _voxelVisuals.DrawShield(_batch,"shield"+actor.Id,_hdPlayer,position,PlayerOrigin,PlayerScale,actor.Bank*MaxPilotRoll,
+                    actor.Pilot.Shield/(float)Math.Max(1,actor.Pilot.MaxShield),Color.Lerp(color,Color.White,.4f)*.85f);
                 if(actor.Pilot.DroneActive) _batch.Draw(_droneSprite,actor.Pilot.DronePosition,null,color,0,
                     new Vector2(_droneSprite.Width/2f,_droneSprite.Height/2f),.43f*CombatZoom,SpriteEffects.None,0);
                 if(actor.Beam) DrawBeam(actor.BeamStart,actor.BeamEnd,12,color*.85f);

@@ -277,10 +277,10 @@ public sealed partial class IronNebulaGame
     private void DrawInfernoBackground()
     {
         int phase=Math.Clamp(_infernoPhase,0,2);
-        DrawEndlessBackdrop(_infernoBackdrops[phase],Color.White*_infernoFade);
+        DrawEndlessBackdrop(_spaceBackdrops[2],Color.White*_infernoFade);
         // Short, unintrusive transition between phases. No giant full-screen flash.
         if(phase>0 && _infernoPhaseFade<1f)
-            DrawEndlessBackdrop(_infernoBackdrops[phase-1],Color.White*(1f-_infernoPhaseFade));
+            DrawEndlessBackdrop(_spaceBackdrops[2],Color.White*(1f-_infernoPhaseFade));
         _ui.Rect(_batch,new Rectangle(0,0,ViewWidth,ViewHeight),new Color(9,1,1,13));
     }
 

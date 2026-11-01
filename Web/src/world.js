@@ -1,3 +1,5 @@
+import {capturePositions,resolveWorldMovement,solidBodies,reserveSpawn} from './space-physics.js';
+import {spaceEncounter} from './space-field.js';
 export const WIDTH=1920, HEIGHT=1080, MAX_PLAYERS=6;
 export const COLORS=['#55e6ff','#8dff92','#ffc077','#c9a1ff','#ffe57f','#ff9bd8'];
 export const WEAPONS=[
@@ -18,6 +20,7 @@ function random(w){let x=w.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;w.rng=x;return (x>>>
 const roll=(w,a,b)=>a+random(w)*(b-a);
 export function createWorld(seed=87321){return {schema:1,build:'0.9.14-web',tick:0,rng:seed||1,nextId:1,
   phase:'lobby',sector:1,sectorTime:0,time:0,difficulty:1,bossStage:0,waveTimer:1,wave:0,endless:false,orbit:0,
+  spaceSeed:(seed^0x50ace123)>>>0,spaceIndex:0,spaceClock:2,spaceGenerator:1,
   score:0,credits:0,earned:0,unlocked:1,kills:0,players:[],enemies:[],shots:[],rocks:[],pickups:[],fx:[],
   upgrades:{engine:0,power:0,drone:0,magnet:0},sectorKills:0};}
 export function addPlayer(w,id,name='PILOT'){
@@ -62,10 +65,16 @@ function spawnEnemy(w,boss=0){
   const kind=boss?'boss':['scout','interceptor','heavy'][Math.floor(random(w)*3)],tier=boss===2?2:1;
   const factor=[.78,1,1.32][w.difficulty]*(1+.65*(w.players.length-1))*(1+Math.min(20,w.orbit??0)*.15);
   const hp=Math.ceil((boss?(boss===2?145:75):kind==='heavy'?5:kind==='interceptor'?3:2)*(1+.35*(w.sector-1))*factor);
-  const e={id:w.nextId++,kind,boss:tier,bossType:boss,x:boss?1770:2020,y:boss?540:roll(w,220,890),baseY:roll(w,260,820),
+  const e={id:w.nextId++,kind,boss:tier,bossType:boss,x:boss?2240:2080,y:boss?540:roll(w,220,890),baseY:roll(w,260,820),
     radius:boss?(boss===2?155:120):kind==='heavy'?48:34,health:hp,maxHealth:hp,
     width:boss?(boss===2?370:295):kind==='heavy'?145:115,speed:boss?50:roll(w,150,250)+w.sector*20,
     age:0,timer:boss?1.4:roll(w,.8,2.2),phase:roll(w,0,6.28),name:boss?(boss===2?SECTORS[w.sector-1].boss:SECTORS[w.sector-1].mini):kind};
+  const reservations=solidBodies(w);let placed=false;
+  for(let attempt=0;attempt<24;attempt++){
+    if(attempt)e.y=roll(w,boss?340:220,boss?740:890);
+    if(reserveSpawn({id:e.id,type:'enemy',x:e.x,y:e.y,radius:e.radius,half:Math.max(0,e.width/2-e.radius)},reservations)){placed=true;break;}
+  }
+  if(!placed)return null;
   if(boss)w.bossStage=boss===1?1:3;
   w.enemies.push(e);return e;
 }
@@ -90,7 +99,10 @@ export function hurtPlayer(w,p){
   effect(w,'impact',p.x,p.y,p.shield>0?'#65dfff':'#ff866d',80);
   if(p.health<=0){
     p.lives--;effect(w,'explosion',p.x,p.y,COLORS[p.id],115);p.beam=false;
-    if(p.lives>0){p.health=p.maxHealth;p.invuln=3;p.x=280+(p.id%2)*180;p.y=250+Math.floor(p.id/2)*270;p.level=Math.max(1,p.level-1);}
+    if(p.lives>0){p.health=p.maxHealth;p.invuln=3;p.level=Math.max(1,p.level-1);
+      const reservations=solidBodies(w);for(let i=0;i<30;i++){const candidate={id:p.id,type:'player',x:220+i%5*180,y:230+Math.floor(i/5)*130,radius:40,half:90};
+        if(reserveSpawn(candidate,reservations)){p.x=candidate.x;p.y=candidate.y;break;}}
+    }
   }return true;
 }
 function segmentDistance(x,y,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy||1),0,1);return (x-a.x-dx*t)**2+(y-a.y-dy*t)**2;}
@@ -112,6 +124,7 @@ export function stepWorld(w,inputs,dt=1/60){
   w.sectorTime+=dt;
   const alive=w.players.filter(p=>p.lives>0);
   if(!alive.length){w.phase='gameover';return;}
+  const previousPositions=capturePositions(w);
   for(const p of alive){
     const i=inputs[p.id]??neutralInput();p.invuln=Math.max(0,p.invuln-dt);p.timer-=dt;p.precision=i.precision;
     if(i.revision>p.revision){setWeapon(w,p,i.weapon);p.revision=i.revision;}
@@ -120,13 +133,6 @@ export function stepWorld(w,inputs,dt=1/60){
       p.x=i.target.x+(ox+ix*dt)*decay;p.y=i.target.y+(oy+iy*dt)*decay;p.vx=(p.vx-spring*ix*dt)*decay;p.vy=(p.vy-spring*iy*dt)*decay;
     }else{const speed=(i.precision?260:550)*(1+.08*w.upgrades.engine),blend=1-Math.exp(-dt*(length<.01?14:9));p.vx+=(x*speed-p.vx)*blend;p.vy+=(y*speed-p.vy)*blend;p.x+=p.vx*dt;p.y+=p.vy*dt;}
     p.x=clamp(p.x,100,1800);p.y=clamp(p.y,160,950);p.beam=i.fire&&p.weapon===4;
-    if(p.beam){
-      p.beamEnd=1880;let target;
-      for(const e of w.enemies)if(e.health>0&&e.x>p.x+85&&Math.abs(e.y-p.y)<e.radius+12&&e.x-e.radius<p.beamEnd){target=e;p.beamEnd=e.x-e.radius;}
-      if(p.timer<=0){if(target)hitEnemy(w,target,1+w.upgrades.power,p);p.timer=WEAPONS[4].interval;}
-    }else if(i.fire&&p.timer<=0){fire(w,p);p.timer=WEAPONS[p.weapon].interval;}
-    if(p.drone||w.upgrades.drone){p.droneTimer-=dt;const target=w.enemies.filter(e=>e.health>0&&e.x>p.x).sort((a,b)=>distance(a,p)-distance(b,p))[0];
-      if(target&&p.droneTimer<=0){const angle=Math.atan2(target.y-(p.y-65),target.x-(p.x-70));shot(w,p,p.x-70,p.y-65,Math.cos(angle)*1000,Math.sin(angle)*1000,0,1+w.upgrades.drone);p.droneTimer=.5-.06*w.upgrades.drone;}}
   }
   const sector=SECTORS[w.sector-1];w.waveTimer-=dt;
   if(w.bossStage===0&&w.sectorTime>=sector.miniAt)spawnEnemy(w,1);
@@ -134,12 +140,29 @@ export function stepWorld(w,inputs,dt=1/60){
   if(w.bossStage===4){w.phase='shop';for(const p of w.players)p.ready=false;w.shots=[];return;}
   if(w.waveTimer<=0&&w.enemies.length<22&&!w.enemies.some(e=>e.kind==='boss'&&e.health>0)){
     w.wave++;for(let i=0;i<Math.min(5,2+Math.floor(w.sectorTime/25));i++)spawnEnemy(w);w.waveTimer=Math.max(1.3,3.4-.2*w.sector);
-    if(random(w)<.65)w.rocks.push({id:w.nextId++,x:2010,y:roll(w,230,900),radius:roll(w,25,65),angle:random(w)*6.28,health:4});
   }
+  w.spaceSeed??=(w.rng^0x50ace123)>>>0;w.spaceIndex??=0;w.spaceClock=(w.spaceClock??2)-dt;
+  if(w.spaceClock<=0&&w.rocks.length<24){const encounter=spaceEncounter(w.spaceSeed,w.spaceIndex++),rock={id:w.nextId++,x:2180,...encounter,health:encounter.maxHealth};
+    if(reserveSpawn({...rock,type:'rock',half:0},solidBodies(w))){w.rocks.push(rock);w.spaceClock=encounter.delay;}else w.spaceClock=.4;}
   for(const e of w.enemies){
     e.age+=dt;e.timer-=dt;
     if(e.kind==='boss'){e.x=Math.max(1530,e.x-e.speed*dt);e.y=540+Math.sin(e.age*.8)*255;}
     else {e.x-=e.speed*dt;e.y+=Math.sin(e.age*2.3+e.phase)*dt*65;}
+  }
+  for(const r of w.rocks){r.x-=(r.speed??145)*dt;if(r.kind!=='station')r.angle+=dt*.2;}
+  resolveWorldMovement(w,previousPositions,dt,(player)=>hurtPlayer(w,player));
+  for(const p of alive){
+    const i=inputs[p.id]??neutralInput();
+    if(p.beam){
+      p.beamEnd=1880;let target,rock;
+      for(const e of w.enemies)if(e.health>0&&e.x>p.x+85&&Math.abs(e.y-p.y)<e.radius+12&&e.x-e.radius<p.beamEnd){target=e;p.beamEnd=e.x-e.radius;}
+      for(const r of w.rocks)if(r.health>0&&r.x>p.x+85&&Math.abs(r.y-p.y)<r.radius&&r.x-r.radius<p.beamEnd){rock=r;target=null;p.beamEnd=r.x-r.radius;}
+      if(p.timer<=0){if(target)hitEnemy(w,target,1+w.upgrades.power,p);if(rock)rock.health-=1+w.upgrades.power;p.timer=WEAPONS[4].interval;}
+    }else if(i.fire&&p.timer<=0){fire(w,p);p.timer=WEAPONS[p.weapon].interval;}
+    if(p.drone||w.upgrades.drone){p.droneTimer-=dt;const target=w.enemies.filter(e=>e.health>0&&e.x>p.x).sort((a,b)=>distance(a,p)-distance(b,p))[0];
+      if(target&&p.droneTimer<=0){const angle=Math.atan2(target.y-(p.y-65),target.x-(p.x-70));shot(w,p,p.x-70,p.y-65,Math.cos(angle)*1000,Math.sin(angle)*1000,0,1+w.upgrades.drone);p.droneTimer=.5-.06*w.upgrades.drone;}}
+  }
+  for(const e of w.enemies){
     const target=alive[Math.floor((e.id+w.time/3)%alive.length)];
     if(e.timer<=0&&e.x<1900&&target){
       const angle=Math.atan2(target.y-e.y,target.x-e.x),boss=e.kind==='boss',pattern=boss?Math.floor(e.age/5)%3:0;
@@ -153,15 +176,13 @@ export function stepWorld(w,inputs,dt=1/60){
       }
       e.timer=boss?(pattern===0?.65:.9):2.2;
     }
-    for(const p of alive)if(distance(e,p)<(e.radius+28)**2)hurtPlayer(w,p);
   }
-  for(const r of w.rocks){r.x-=145*dt;r.angle+=dt*.2;for(const p of alive)if(distance(r,p)<(r.radius+28)**2){if(hurtPlayer(w,p))r.health=0;}}
   for(const s of w.shots){
     s.age+=dt;s.px=s.x;s.py=s.y;s.x+=s.vx*dt;s.y+=s.vy*dt;
     if(s.friendly){
       for(const e of w.enemies){if(e.health<=0||s.hits.includes(e.id)||segmentDistance(e.x,e.y,{x:s.px,y:s.py},s)>(s.radius+e.radius)**2)continue;
         hitEnemy(w,e,s.damage,w.players.find(p=>p.id===s.owner));s.hits.push(e.id);if(--s.pierce<=0){s.life=0;break;}}
-      for(const r of w.rocks)if(distance(s,r)<(s.radius+r.radius)**2){r.health-=s.damage;s.life=0;}
+      for(const r of w.rocks)if(s.life>0&&r.health>0&&segmentDistance(r.x,r.y,{x:s.px,y:s.py},s)<(s.radius+r.radius)**2){r.health-=s.damage;s.life=0;effect(w,r.health<=0?'explosion':'impact',r.x,r.y,'#ffb46e',r.health<=0?r.radius:18);}
     }else for(const p of alive)if(segmentDistance(p.x,p.y,{x:s.px,y:s.py},s)<(s.radius+25)**2&&hurtPlayer(w,p)){s.life=0;break;}
   }
   for(const item of w.pickups){
@@ -202,6 +223,7 @@ export function validSnapshot(w){
   const number=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max,integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
   const point=o=>o&&number(o.x,-5000,5000)&&number(o.y,-3000,3000),id=o=>integer(o.id,1,Number.MAX_SAFE_INTEGER),color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
   if(w&&(w.endless!==undefined&&typeof w.endless!=='boolean'||w.orbit!==undefined&&!integer(w.orbit,0,1000000)))return false;
+  if(w&&(w.spaceSeed!==undefined&&!integer(w.spaceSeed,0,4294967295)||w.spaceIndex!==undefined&&!integer(w.spaceIndex,0,Number.MAX_SAFE_INTEGER)||w.spaceClock!==undefined&&!number(w.spaceClock,-1,10)))return false;
   if(!w||w.schema!==1||w.build!=='0.9.14-web'||!integer(w.tick,0,Number.MAX_SAFE_INTEGER)||!['lobby','playing','shop','gameover','victory'].includes(w.phase)||
     !integer(w.sector,1,3)||!integer(w.difficulty,0,2)||!number(w.time,0,1e8)||!number(w.sectorTime,0,1e8)||!integer(w.unlocked,1,31)||
     !number(w.score,0,1e12)||!number(w.credits,0,1e9)||!w.upgrades||!['engine','power','drone','magnet'].every(k=>integer(w.upgrades[k],0,3)))return false;
@@ -210,7 +232,8 @@ export function validSnapshot(w){
     number(p.health,0,10000)&&number(p.maxHealth,1,10000)&&integer(p.lives,0,20)&&number(p.shield,0,20)&&typeof p.name==='string'&&p.name.length<=20)||new Set(w.players.map(p=>p.id)).size!==w.players.length)return false;
   if(!w.enemies.every(e=>point(e)&&id(e)&&['boss','scout','interceptor','heavy'].includes(e.kind)&&number(e.width,10,600)&&number(e.radius,1,300)&&number(e.health,0,1e8)&&number(e.maxHealth,1,1e8)&&number(e.age,0,1e8)&&typeof e.name==='string'&&e.name.length<=60))return false;
   if(!w.shots.every(s=>point(s)&&id(s)&&integer(s.owner,-1,5)&&typeof s.friendly==='boolean'&&integer(s.weapon,0,4)&&number(s.vx,-5000,5000)&&number(s.vy,-5000,5000)&&number(s.radius,1,50)&&color(s.color)))return false;
-  if(!w.rocks.every(r=>point(r)&&id(r)&&number(r.radius,1,200)&&number(r.angle,-1e8,1e8)))return false;
+  if(!w.rocks.every(r=>point(r)&&id(r)&&number(r.radius,1,200)&&number(r.angle,-1e8,1e8)&&number(r.health,0,1e5)&&
+    (r.maxHealth===undefined||number(r.maxHealth,1,1e5))&&(r.speed===undefined||number(r.speed,0,300))&&(r.kind===undefined||['asteroid','wreck','station'].includes(r.kind))))return false;
   if(!w.pickups.every(p=>point(p)&&id(p)&&['credits','weapon','shield','repair','drone'].includes(p.type)))return false;
   return w.fx.every(f=>point(f)&&id(f)&&['flash','explosion','impact','pickup'].includes(f.type)&&color(f.color)&&number(f.size,0,500)&&number(f.age,0,5)&&number(f.life,.01,5));
 }

@@ -23,3 +23,5 @@ jobs:
         run: dotnet run --project Tools/ControllerChecks/ControllerChecks.csproj -c Release
       - name: Verify six-player loopback networking
         run: dotnet run --project Tools/CoopChecks/CoopChecks.csproj -c Release
+      - name: Verify shield FFT and voxel population
+        run: dotnet run --project Tools/VisualChecks/VisualChecks.csproj -c Release

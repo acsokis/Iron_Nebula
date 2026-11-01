@@ -1,6 +1,8 @@
 import {WEAPONS} from './world.js';
+import {downloadAsset} from './preload.js';
 const MIDI=n=>440*2**((n-69)/12);
 export class AudioEngine{
+  async preload(onProgress=()=>{}){const blob=await downloadAsset(new URL('./audio/desktop-theme.mp3',document.baseURI).href,onProgress);this.desktopUrl=URL.createObjectURL(blob);}
   constructor(){this.enabled=true;this.music=.3;this.sfx=.55;this.musicSource='desktop';this.lastTick=0;this.lastShot=0;this.seen=new Set();this.voices=0;this.settings={};this.phase=null;this.lastUi=0;this.beat=-1;this.lastBeam=0;}
   setMusicSource(value){this.musicSource=value==='chip'?'chip':'desktop';this.desktopFailed=false;if(this.musicSource==='chip')this.desktop?.pause();}
   playDesktop(){if(!this.desktop||this.starting||this.desktopFailed||!this.enabled||this.music<=0||this.musicSource!=='desktop')return;
@@ -11,7 +13,7 @@ export class AudioEngine{
       const c=this.context=new Context(),master=this.master=c.createGain(),limiter=c.createDynamicsCompressor();master.gain.value=.5;
       limiter.threshold.value=-10;limiter.ratio.value=8;limiter.attack.value=.003;limiter.release.value=.18;master.connect(limiter).connect(c.destination);
       this.fx=c.createGain();this.fx.gain.value=this.sfx;this.fx.connect(master);this.ambient=c.createGain();this.ambient.gain.value=this.music*.17;this.ambient.connect(master);
-      this.desktop=new Audio(new URL('./audio/desktop-theme.mp3',document.baseURI).href);this.desktop.loop=true;this.desktop.preload='none';
+      this.desktop=new Audio(this.desktopUrl??new URL('./audio/desktop-theme.mp3',document.baseURI).href);this.desktop.loop=true;this.desktop.preload='auto';
       this.desktopGain=c.createGain();this.desktopGain.gain.value=this.music*.65;c.createMediaElementSource(this.desktop).connect(this.desktopGain).connect(master);
       this.desktop.addEventListener('error',()=>{this.desktopFailed=true;});
       const lowpass=c.createBiquadFilter();lowpass.type='lowpass';lowpass.frequency.value=430;lowpass.Q.value=.6;lowpass.connect(this.ambient);
