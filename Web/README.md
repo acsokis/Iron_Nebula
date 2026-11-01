@@ -1,4 +1,4 @@
-# Iron Nebula Web — 0.9.13
+# Iron Nebula Web — 0.9.14
 
 A static **WebGL 2** browser adaptation of the current Iron Nebula project. No
 native installer or game server is required for solo play. WebRTC co-op uses one
@@ -8,8 +8,11 @@ not compatible with browser rooms/saves.
 
 ## Play
 
-- **Launch solo** starts a three-sector campaign. A solo browser save is kept in
-  localStorage; Continue resumes it. Browser saves/settings never overwrite the
+- **Launch solo** starts a new roguelike bullet-hell space arcade run.
+  Settings selects Endless Orbit (default) or the finite three-sector campaign
+  before launch. Each new run has a fresh procedural seed and resets run upgrades.
+  Orbit loops the sectors with stronger enemies, retaining the current run's upgrades.
+  A solo browser save is kept in localStorage; Continue resumes it. Browser saves/settings never overwrite the
   Windows save files.
 - **Host wing** opens a WebRTC room. Share the room code or invite link. Guests
   choose **Join wing**. The host launches once at least one guest joins.
@@ -52,8 +55,11 @@ not point to the game PC from another physical device.
   is not labeled HDR. Actual HDR luminance requires physical display validation.
 - Original, synthesized Atari-inspired chip sounds, per-weapon effects, noise
   explosions, low space ambience and an original arpeggio. Audio starts after a
-  user gesture; music and effects have independent volume controls. No original
-  soundtrack, ROM or copyrighted tune is bundled.
+  user gesture; music and effects have independent volume controls. No game
+  ROM samples are bundled. **Propulsive Peak**, the user-provided desktop
+  soundtrack, is now available on the web at the user's explicit request and is
+  the default music source. Settings can select original procedural chiptune.
+  No Creative Commons or royalty-free claim is made for the desktop track.
 - Browser gamepad vibration is best-effort. Native DualSense adaptive-trigger
   effects and USB actuator audio remain Windows-build features.
 
@@ -92,7 +98,8 @@ npm.cmd run dev
 
 The optimized web textures are tracked. To regenerate from a complete local
 Windows asset tree: `npm.cmd run assets -- ../Assets`. Never include the excluded
-Propulsive Peak soundtrack. Runtime game assets must remain same-origin.
+unapproved audio. The explicitly requested desktop track is separately hash-pinned
+in `public/audio/manifest.json`. Runtime game assets must remain same-origin.
 
 Browser checks use Playwright and a local test-only PeerServer:
 
@@ -121,5 +128,16 @@ external runtime script CDN is required. Upstream publication requires the owner
 to merge/enable the workflow; a contributor can publish their own fork.
 
 See [security and release audit](SECURITY_AUDIT.md). The native game and browser
+adaptation now use the same side-view player, original pickups, cockpit,
+engine plume, damage layers and explosion/impact art. The browser keeps its
+own responsive menu layout and WebGL postprocessing; pixel-identical output
+across DirectX and browser displays has not been certified. Backgrounds use
+continuous mirrored tiles with three independent parallax/DOF depths.
+Tethered pointer flight is on by default and can be disabled in Settings.
+Finger dragging captures the touch pointer and follows continuously without
+page scrolling; physical iOS/Android validation remains separate from the
+automated Chromium touch-event checks.
+
+The native game and browser
 adaptation share artwork and design but are not asserted to be perfectly identical
 in every spawn pattern, balance value or boss phase.

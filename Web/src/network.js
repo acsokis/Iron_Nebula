@@ -28,7 +28,7 @@ export class Network{
     const normalized=cleanCode(code);if(!normalized)throw new Error('Enter a valid room code.');
     this.close();this.closed=false;this.host=false;this.myId=-1;this.code=normalized;
     this.peer=new Peer(peerOptions(iceServers));await this.open();
-    const connection=this.peer.connect(`iron-nebula-g-${normalized.toLowerCase()}`,{reliable:true,serialization:'json',metadata:{role:'pilot',build:'0.9.13-web'}});
+    const connection=this.peer.connect(`iron-nebula-g-${normalized.toLowerCase()}`,{reliable:true,serialization:'json',metadata:{role:'pilot',build:'0.9.14-web'}});
     this.server=connection;this.lastStateAt=performance.now();
     return new Promise((resolve,reject)=>{
       let welcomed=false;const timer=setTimeout(()=>{connection.close();reject(new Error('Connection timed out. The room may be closed, or this network needs TURN.'));},15000);

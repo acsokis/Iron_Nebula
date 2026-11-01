@@ -2,6 +2,25 @@
 
 A projekthez tartozó kiadástörténet 2026. október 28-i állapot szerint. A felsorolt Alpha változatok a fejlesztés történeti mérföldkövei; a csomag a **0.9.11.2** állapotot reprezentálja. A fejlesztések funkcionális összefoglalói alapján készült, nem külön-külön Git-commitból rekonstruált történet.
 
+## Browser 0.9.14 - Endless Orbit / native visual assets
+
+- Add endless sector loops, randomized run seeds, per-run upgrades and rotating
+  boss fan/ring patterns with a deliberate escape lane.
+- Scroll the original celestial backgrounds continuously with mirrored tiling
+  and independent native DOF/parallax layers.
+- Use the desktop side-view refit ship, native sprite scales/origin, engine plume,
+  cockpit HUD, shields, hull damage, pickups, beam, impact and explosion artwork.
+  Pickups are larger; responsive browser menus and WebGL postprocessing remain
+  separate, so this is not a claim of certified pixel-identical DirectX output.
+- Make tethered pointer flight default-on and optional. Capture touch pointers
+  so dragging steers continuously, releases fire and cannot scroll the page.
+- Include the explicitly requested desktop Propulsive Peak MP3, hash-pinned and
+  streamed same-origin. Keep original procedural chiptune as an optional source;
+  synthesize non-music sounds with Atari-style tones/noise.
+- Add About credits for vizisiklo and Gabor Kocsis / acsokis with their roles.
+- Migrate previous solo campaign saves; require matching 0.9.14 browser room builds.
+- Add orbit-wrap, save migration, audio playback/settings and real touch-drag checks.
+
 ## Browser 0.9.13 - WebGL flight
 
 - Add a static WebGL 2 browser campaign and host-authoritative WebRTC co-op for

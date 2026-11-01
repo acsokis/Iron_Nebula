@@ -1,0 +1,18 @@
+#native-instruments{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;font-family:ui-monospace,Consolas,monospace;color:#78edff;pointer-events:none}
+#native-instruments>*{position:absolute;white-space:nowrap}
+.native-bitmap-hud{left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+#native-instruments>span,#native-instruments>strong,#native-instruments>progress{opacity:0}
+#sector-number{left:221px;top:61px;font-size:21px}
+#sector-name{left:276px;top:69px;font-size:16px;font-weight:400;color:#74ffd0}
+#score{left:574px;top:37px;font-size:29px;letter-spacing:2px;color:#fff}
+#native-lives{left:1230px;top:37px;font-size:29px;color:#fff}
+#native-shield{left:1406px;top:50px;width:244px;height:20px;accent-color:#00bfff}
+.native-tab{top:116px;height:30px;padding:2px 12px;background:#020c1cc4;border:1px solid #429ac782;font-size:21px;line-height:25px}
+#native-hull{left:82px;width:272px}#native-wave{left:731px;width:340px;font-size:17px}
+#credits{left:1100px;top:113px;width:254px;height:37px;padding:3px 12px;color:#ffd771;border-color:#ffb3489b;font-size:24px}
+.native-weapon{left:1501px;width:319px;font-size:20px}.native-weapon span{font-size:15px;float:right}
+#native-instruments #pause-button{left:1750px;top:160px;pointer-events:auto;font-size:16px;padding:6px 10px}
+body[data-party="1"] #party-hud{display:none}
+.native-menu-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5;pointer-events:none}
+#menu>.intro,#menu>.command-panel,#menu>.screen-footnote{z-index:1}
+@media(max-width:700px){.topbar{gap:7px;padding:0 10px}.topbar nav{gap:3px}.topbar .tool{padding:7px}.topbar .tool>span:not([data-hint]){display:none}}

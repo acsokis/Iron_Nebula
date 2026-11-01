@@ -1,12 +1,40 @@
 import test from 'node:test';
+import {orbitTiles} from '../src/orbit.js';
 import assert from 'node:assert/strict';
-import {createWorld,addPlayer,startRun,stepWorld,neutralInput,validInput,validSnapshot,buyUpgrade,hurtPlayer,WEAPONS} from '../src/world.js';
+import {createWorld,addPlayer,startRun,stepWorld,neutralInput,validInput,validSnapshot,migrateSoloSave,buyUpgrade,hurtPlayer,WEAPONS} from '../src/world.js';
 import {packet,readPacket,RateGate,validIceServers,cleanCode,cleanName,fragmentPacket,PacketAssembler,packSnapshot} from '../src/protocol.js';
 const party=()=>{const w=createWorld(12345);for(let i=0;i<6;i++)assert.equal(addPlayer(w,i,`P${i}`),true);startRun(w);return w;};
+test('endless orbit wraps all sectors without losing pilots or upgrades',()=>{
+  const w=party();w.endless=true;w.upgrades.power=2;w.unlocked=31;
+  const ready=Object.fromEntries(w.players.map(p=>[p.id,{...neutralInput(),ready:true}]));
+  for(let lap=0;lap<4;lap++)for(let sector=1;sector<=3;sector++){w.phase='shop';assert.equal(w.sector,sector);stepWorld(w,ready);assert.equal(w.phase,'playing');assert.equal(validSnapshot(w),true);}
+  assert.equal(w.orbit,4);assert.equal(w.sector,1);assert.equal(w.players.length,6);assert.equal(w.upgrades.power,2);assert.equal(w.unlocked,31);
+  w.orbit=-1;assert.equal(validSnapshot(w),false);
+});
+test('orbital background covers the viewport across mirrored wrap boundaries',()=>{
+  for(const time of [0,1,137.1428,137.1429,274.2857,1e8]){
+    const {tiles,camera}=orbitTiles(time,{y:950});const sorted=tiles.map(t=>[t.x-960,t.x+960]).sort((a,b)=>a[0]-b[0]);
+    assert.ok(sorted[0][0]<=0);assert.ok(sorted.at(-1)[1]>=1920);assert.ok(Number.isFinite(camera.y));
+    for(let i=1;i<sorted.length;i++)assert.ok(Math.abs(sorted[i][0]-sorted[i-1][1])<1e-8);
+    assert.notEqual(tiles[0].mirror,tiles[1].mirror);assert.notEqual(tiles[1].mirror,tiles[2].mirror);
+  }
+});
 test('six seats, unique IDs and lobby-only admission',()=>{
   const w=createWorld();for(let i=0;i<6;i++)assert.equal(addPlayer(w,i,'PILOT'),true);
   assert.equal(addPlayer(w,6,'EXTRA'),false);assert.equal(addPlayer(w,0,'DUPLICATE'),false);
   startRun(w);assert.equal(addPlayer(w,5,'LATE'),false);
+});
+test('boss bullet patterns include fans, spirals and a traversable ring lane',()=>{
+  const w=party();w.sectorTime=33;w.waveTimer=999;for(const p of w.players)p.invuln=100;
+  stepWorld(w,{});const boss=w.enemies.find(e=>e.kind==='boss');assert.ok(boss);boss.x=1600;
+  for(const [age,expected] of [[0,7],[5,18],[10,null]]){
+    boss.age=age;boss.timer=0;w.shots=[];stepWorld(w,{});const bullets=w.shots.filter(s=>!s.friendly);
+    if(expected!==null)assert.equal(bullets.length,expected);else{
+      assert.ok(bullets.length>=14&&bullets.length<18);const target=w.players[Math.floor((boss.id+w.time/3)%w.players.length)],aim=Math.atan2(target.y-boss.y,target.x-boss.x);
+      for(const shot of bullets){const angle=Math.atan2(shot.vy,shot.vx),delta=Math.atan2(Math.sin(angle-aim),Math.cos(angle-aim));assert.ok(Math.abs(delta)>=.28-1e-9);}
+    }
+    assert.equal(validSnapshot(w),true);
+  }
 });
 test('six independent pilots move and fire every weapon',()=>{
   const w=party();w.unlocked=31;w.waveTimer=1000;const commands={};
@@ -54,6 +82,11 @@ test('rejects malformed, oversized and incompatible network input',()=>{
   assert.equal(readPacket(packet('input',{input:normal,padding:'x'.repeat(5000)})),null);
   assert.equal(readPacket(packet('world',{world:{players:[]}})),null);
   assert.equal(readPacket({version:1,build:'0.9.13-web',kind:'execute',script:'alert(1)'}),null);
+});
+test('previous solo campaign saves migrate without changing the original object',()=>{
+  const w=createWorld();addPlayer(w,0);startRun(w);w.build='0.9.13-web';delete w.endless;delete w.orbit;
+  const migrated=migrateSoloSave(w);assert.equal(validSnapshot(migrated),true);assert.equal(migrated.endless,false);assert.equal(w.build,'0.9.13-web');
+  assert.equal(readPacket(packet('world',{world:w})),null);
 });
 test('sequence and rate limits reject replay/flood',()=>{
   const gate=new RateGate(3);assert.equal(gate.accept(1000,1),true);assert.equal(gate.accept(1001,1),false);

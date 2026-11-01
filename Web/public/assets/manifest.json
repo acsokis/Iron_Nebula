@@ -3,41 +3,61 @@
   "assets": {
     "ship": {
       "file": "ship.webp",
-      "source": "HD/player_stable.png",
-      "width": 388,
-      "height": 194,
-      "bytes": 28784,
-      "sha256": "8d8e4833b830a2102f64e23b2644d80f69326d416be61786d72693b79e8409c1"
+      "source": "HD/player_sideview_refit.png",
+      "width": 640,
+      "height": 242,
+      "sourceWidth": 1364,
+      "sourceHeight": 515,
+      "bytes": 72006,
+      "sha256": "65b9f86c67d2e5ead7ec884e604d25b5770a6f2a9f466f84348cd00447267af0"
+    },
+    "plume": {
+      "file": "plume.webp",
+      "source": "HD/player_engine_plume.png",
+      "width": 366,
+      "height": 219,
+      "sourceWidth": 366,
+      "sourceHeight": 219,
+      "bytes": 28048,
+      "sha256": "fa03cc181aeb24df06ec60acd0e56f92176996066429dd9c0643a53f42eb9949"
     },
     "scout": {
       "file": "scout.webp",
       "source": "HD/enemy_scout_stable.png",
-      "width": 336,
-      "height": 226,
-      "bytes": 30592,
-      "sha256": "85cf225f133226a342d00a2d985a9069e009dcd461e23ff71d1cd0537727d990"
+      "width": 500,
+      "height": 440,
+      "sourceWidth": 500,
+      "sourceHeight": 440,
+      "bytes": 31190,
+      "sha256": "c82f42ea6db6bfa36fcb07890d5e744a12a824555de193c580504db7a6010d66"
     },
     "interceptor": {
       "file": "interceptor.webp",
       "source": "HD/enemy_interceptor_stable.png",
-      "width": 388,
-      "height": 243,
-      "bytes": 42870,
-      "sha256": "8bb22cc80df8ed8c9a4b63494db068677119a67c6f0bac73ffc90ee6b5b8cc04"
+      "width": 500,
+      "height": 440,
+      "sourceWidth": 500,
+      "sourceHeight": 440,
+      "bytes": 43886,
+      "sha256": "6bbde52ace09ee48fcf6539c896f2913e49777b9d90b86f906ab437f79afb8ad"
     },
     "heavy": {
       "file": "heavy.webp",
       "source": "HD/enemy_heavy_stable.png",
-      "width": 429,
-      "height": 245,
-      "bytes": 49666,
-      "sha256": "618613f99b6013d5511fa1ce62f51a78d41149082179404aa2d2992336db212b"
+      "width": 500,
+      "height": 440,
+      "sourceWidth": 500,
+      "sourceHeight": 440,
+      "bytes": 50834,
+      "sha256": "7194acd9ed1d517b1479934b05308705e28bed8b16e5b25715b3aa7b069ef004"
     },
     "frontier": {
       "file": "frontier.webp",
       "source": "HD/outer_frontier_cinematic.png",
       "width": 1672,
       "height": 941,
+      "sourceWidth": 1672,
+      "sourceHeight": 941,
       "bytes": 323558,
       "sha256": "724c7778cb231309978a8051bb8d8aa128dfc97bfe9a08fe1b7a45586b17c068"
     },
@@ -46,6 +66,8 @@
       "source": "Rift/rift_clean_075.png",
       "width": 1920,
       "height": 1080,
+      "sourceWidth": 1920,
+      "sourceHeight": 1080,
       "bytes": 220420,
       "sha256": "1745a568843c395bab8ffc7b9e62086afe2194a55102cd2856f4d208ce293a0a"
     },
@@ -54,144 +76,420 @@
       "source": "Inferno/inferno_backdrop_0.jpg",
       "width": 1920,
       "height": 1080,
+      "sourceWidth": 1920,
+      "sourceHeight": 1080,
       "bytes": 226022,
       "sha256": "3143b1fb95f32e524f27ba3ef56d7090dc1675f38d8fcdd20f064c7b8d1b9819"
     },
     "riftGuardian": {
       "file": "riftGuardian.webp",
       "source": "Rift/rift_guardian_boss.png",
-      "width": 611,
-      "height": 387,
-      "bytes": 100474,
-      "sha256": "32ab112778f334f0da594aee7353a495e117efded6dc788ced8451a2964929bd"
+      "width": 640,
+      "height": 579,
+      "sourceWidth": 840,
+      "sourceHeight": 760,
+      "bytes": 73466,
+      "sha256": "634686d9f663c34af868399b9900bb84dc5f747dfe9240fa15c75e7b04c86cd2"
     },
     "riftBoss": {
       "file": "riftBoss.webp",
       "source": "Rift/rift_colossus_boss.png",
       "width": 640,
-      "height": 304,
-      "bytes": 117918,
-      "sha256": "95fd50d4d843eda2ce5a4a2e06707c33f824b9f532b5cf2eeab39611cf90b803"
+      "height": 578,
+      "sourceWidth": 1040,
+      "sourceHeight": 940,
+      "bytes": 79882,
+      "sha256": "d2c313bd5f91c3b0134ce4763782dbfe9f3492f322c4e78172bfbfc04f43714c"
     },
     "infernoGuardian": {
       "file": "infernoGuardian.webp",
       "source": "Inferno/inferno_guardian_boss.png",
       "width": 640,
-      "height": 395,
-      "bytes": 104692,
-      "sha256": "f8135e36ef535a034f6df6286d1c4edae6c8bfc01a100127f00c3a61c6a6738f"
+      "height": 484,
+      "sourceWidth": 820,
+      "sourceHeight": 620,
+      "bytes": 77802,
+      "sha256": "4722733173a019bbf1834a26332ef3031beb12499cb15d6703a7d9f144a393a4"
     },
     "infernoBoss": {
       "file": "infernoBoss.webp",
       "source": "Inferno/inferno_titan_boss.png",
       "width": 640,
-      "height": 297,
-      "bytes": 112042,
-      "sha256": "d372462d70d7ebcd80024eeda53be614a8c9314b33073f10bc5319d9cd45e120"
+      "height": 538,
+      "sourceWidth": 1000,
+      "sourceHeight": 840,
+      "bytes": 83780,
+      "sha256": "34331d5c4767e8f303a3459595ea6345e24d16dcd4615796ac72a58497a9f508"
     },
     "dart": {
       "file": "dart.webp",
       "source": "Rift/rift_dart.png",
-      "width": 307,
-      "height": 228,
-      "bytes": 29232,
-      "sha256": "3b28c32d77d7936862c2338770048c9171bcd268bde700bacd8053abac45ae8c"
+      "width": 560,
+      "height": 320,
+      "sourceWidth": 560,
+      "sourceHeight": 320,
+      "bytes": 29658,
+      "sha256": "94dba5ebd7329602e5a3eedd160a3d6af4a6a53a14600e52515120c11dd60f76"
     },
     "wisp": {
       "file": "wisp.webp",
       "source": "Rift/rift_wisp.png",
-      "width": 302,
-      "height": 229,
-      "bytes": 32218,
-      "sha256": "329909654f3ae91f42c1e228409aaff2454a260eabbb6cc7d3765bd039bba09e"
+      "width": 560,
+      "height": 320,
+      "sourceWidth": 560,
+      "sourceHeight": 320,
+      "bytes": 33176,
+      "sha256": "2d4c653eb1a2ca92d3e6bb91713403f3d65dcee33caf891aef6818895988fbf5"
     },
     "infernoEnemy": {
       "file": "infernoEnemy.webp",
       "source": "Inferno/inferno_enemy_0.png",
-      "width": 274,
-      "height": 178,
-      "bytes": 24442,
-      "sha256": "51d81b464633c8aa919c1c76477ae0b69215c178c53161569932c9e0cbc86b66"
+      "width": 400,
+      "height": 260,
+      "sourceWidth": 400,
+      "sourceHeight": 260,
+      "bytes": 25152,
+      "sha256": "6c058825b58c1322993aab6e1b51fd97cef21213173cbb6b6a46df3509f7a45a"
     },
     "pulse": {
       "file": "pulse.webp",
       "source": "FX/primary_pulse.png",
       "width": 224,
-      "height": 97,
-      "bytes": 3466,
-      "sha256": "9a1a66002394f0eb0c07f0e012f92b68a68e539985e9c0cf564bfc1dc4fc10bc"
+      "height": 100,
+      "sourceWidth": 224,
+      "sourceHeight": 100,
+      "bytes": 3380,
+      "sha256": "4df267ff4a3a30441e2a9668b6659e33162a1b49d3157d7d9cb840ce13f113c6"
     },
     "lance": {
       "file": "lance.webp",
       "source": "FX/primary_lance.png",
       "width": 270,
-      "height": 71,
-      "bytes": 4042,
-      "sha256": "c41fcd4e3229a4617bace8279a5488fc928a037820b324ef77e656a49d9f1db6"
+      "height": 84,
+      "sourceWidth": 270,
+      "sourceHeight": 84,
+      "bytes": 4078,
+      "sha256": "ceaae1e82eba6670ca7a0d13146917c8b2b59a16f6b56891c8d3992743e9df2b"
     },
     "arc": {
       "file": "arc.webp",
       "source": "FX/primary_arc.png",
       "width": 220,
       "height": 148,
+      "sourceWidth": 220,
+      "sourceHeight": 148,
       "bytes": 7502,
       "sha256": "acb8112eebf8d932b63c030536ed172ee2f8c2a3ff2cc33acb0a940fb0036e9f"
     },
     "gatling": {
       "file": "gatling.webp",
       "source": "FX/primary_gatling.png",
-      "width": 106,
-      "height": 35,
-      "bytes": 1678,
-      "sha256": "6695e5625d2ee3914f42cfe7de4c74d21c22981fe45fae8f01ac573188fd06af"
+      "width": 128,
+      "height": 52,
+      "sourceWidth": 128,
+      "sourceHeight": 52,
+      "bytes": 1870,
+      "sha256": "996307dd656ee8af0d3381ce4ae75a0ea1a96b8bedf5fb46bd604f9e582aebf9"
     },
     "warden": {
       "file": "warden.webp",
       "source": "mini_warden.png",
-      "width": 576,
-      "height": 328,
-      "bytes": 77924,
-      "sha256": "94f3d66afe2d22d768aeb12fe2caa0f7603b6b39fa2434e320e0b70286867e3a"
+      "width": 640,
+      "height": 455,
+      "sourceWidth": 760,
+      "sourceHeight": 540,
+      "bytes": 63874,
+      "sha256": "f5860217e91f16d24e1b074edb23e9ccf92b83c052a36d880a819988c133a24a"
     },
     "sentinel": {
       "file": "sentinel.webp",
       "source": "boss_sentinel.png",
-      "width": 606,
-      "height": 274,
-      "bytes": 91904,
-      "sha256": "01975d9852edb6955f8a70ccce601fe0d5e0b8939f1c53217865c6f245dc6737"
+      "width": 640,
+      "height": 562,
+      "sourceWidth": 740,
+      "sourceHeight": 650,
+      "bytes": 76744,
+      "sha256": "e145283b162a02a446a026ab460b1ff6980005736f23a1baffd9c06513bfb2fc"
     },
     "rock": {
       "file": "rock.webp",
       "source": "HD/rock_04.png",
-      "width": 277,
-      "height": 241,
-      "bytes": 37482,
-      "sha256": "bfdabb698493d908ec7f05ba6ff9278750fafa0f4d0762e4197f2979bb20bf55"
+      "width": 298,
+      "height": 298,
+      "sourceWidth": 298,
+      "sourceHeight": 298,
+      "bytes": 37548,
+      "sha256": "787bd0cbbfcc94206de4177bfe0e911536c250bf854cd379dafe6310d06bfaf3"
     },
     "rock2": {
       "file": "rock2.webp",
       "source": "HD/rock_09.png",
-      "width": 437,
-      "height": 494,
-      "bytes": 104028,
-      "sha256": "b50e64be53f43efd36abfaddc5779e4f200f7824024c654dd175c1635d7dbe29"
+      "width": 512,
+      "height": 512,
+      "sourceWidth": 512,
+      "sourceHeight": 512,
+      "bytes": 105852,
+      "sha256": "2ff37c8f8a62e1722b4996b2e53dc276e369f25688e8741ded8850b1cab62f55"
     },
     "drone": {
       "file": "drone.webp",
       "source": "support_drone.png",
-      "width": 341,
-      "height": 232,
-      "bytes": 21018,
-      "sha256": "86aea27e992df9cb2c9d60406ff42292be6517512d7ce21d35b21e003df92490"
+      "width": 440,
+      "height": 280,
+      "sourceWidth": 440,
+      "sourceHeight": 280,
+      "bytes": 21344,
+      "sha256": "97bdf8e26aa92f697ace97dc8602002c4619faf68f007030506f21c2ce8bd880"
     },
     "shield": {
       "file": "shield.webp",
       "source": "shield_ring.png",
-      "width": 477,
-      "height": 477,
-      "bytes": 52616,
-      "sha256": "d2c8895a4baf8f2d8eeae31f6edc4589f6f661a5f55a641eb6ce6aae2343bb13"
+      "width": 512,
+      "height": 512,
+      "sourceWidth": 512,
+      "sourceHeight": 512,
+      "bytes": 52860,
+      "sha256": "17adc2c5c4bb52beb450c01e0859ebe2d5577cfacec178e81d133b50a9d37522"
+    },
+    "shieldShell": {
+      "file": "shieldShell.webp",
+      "source": "FX/shield_shell.png",
+      "width": 256,
+      "height": 256,
+      "sourceWidth": 256,
+      "sourceHeight": 256,
+      "bytes": 15894,
+      "sha256": "15a2376d3ac3d06a77c9a22b00b8300d54edda19299b9ed82cc958eb7af9ca4e"
+    },
+    "cockpit": {
+      "file": "cockpit.webp",
+      "source": "FX/cockpit_hud_slim_075.png",
+      "width": 1920,
+      "height": 132,
+      "sourceWidth": 1920,
+      "sourceHeight": 132,
+      "bytes": 80458,
+      "sha256": "b35c2aa2087213d251ec47ec754976b3bc841214b5c80d29c1df7b1368145cb3"
+    },
+    "menu": {
+      "file": "menu.webp",
+      "source": "UI/menu_backdrop_092.jpg",
+      "width": 1920,
+      "height": 1080,
+      "sourceWidth": 1920,
+      "sourceHeight": 1080,
+      "bytes": 88348,
+      "sha256": "ce53bae9a967a77b606df7a83a81f96c3cc2ab8aeac1e5eb1f6819126a545f16"
+    },
+    "uiAtlas": {
+      "file": "uiAtlas.webp",
+      "source": "ui_atlas.png",
+      "width": 1152,
+      "height": 528,
+      "sourceWidth": 1152,
+      "sourceHeight": 528,
+      "bytes": 24100,
+      "sha256": "ff0cbfee8df90556d010a4eb8115a56fd41c7858053c7236cb9fad0994b60580"
+    },
+    "pickupCredits": {
+      "file": "pickupCredits.webp",
+      "source": "FX/pickup_credits.png",
+      "width": 128,
+      "height": 128,
+      "sourceWidth": 128,
+      "sourceHeight": 128,
+      "bytes": 10454,
+      "sha256": "ab4e1519ba0171017b28d9863d165d2c502bbf6f5827089e8623c24e799052c7"
+    },
+    "pickupWeapon": {
+      "file": "pickupWeapon.webp",
+      "source": "FX/pickup_weapon.png",
+      "width": 128,
+      "height": 128,
+      "sourceWidth": 128,
+      "sourceHeight": 128,
+      "bytes": 4740,
+      "sha256": "4bda79028e750bb5efbaf53c75a75d9a9edab91f174e30d01f822af875908a0f"
+    },
+    "pickupShield": {
+      "file": "pickupShield.webp",
+      "source": "FX/pickup_shield.png",
+      "width": 128,
+      "height": 128,
+      "sourceWidth": 128,
+      "sourceHeight": 128,
+      "bytes": 5050,
+      "sha256": "9a0d2312e4ba5f7fa793068d7452e8177d49938b8dd8f0f16ba396321a077526"
+    },
+    "pickupRepair": {
+      "file": "pickupRepair.webp",
+      "source": "FX/pickup_repair.png",
+      "width": 128,
+      "height": 128,
+      "sourceWidth": 128,
+      "sourceHeight": 128,
+      "bytes": 4514,
+      "sha256": "34b1c25c544efdae13360a283cb9b98fba94f9acb13dc3fcf569e4556c636abf"
+    },
+    "pickupDrone": {
+      "file": "pickupDrone.webp",
+      "source": "FX/pickup_drone.png",
+      "width": 128,
+      "height": 128,
+      "sourceWidth": 128,
+      "sourceHeight": 128,
+      "bytes": 3468,
+      "sha256": "6a2fedb620b754b923a4ac178427456786ba3ceb6b7ee7181246a1731fe0cb30"
+    },
+    "explosion": {
+      "file": "explosion.webp",
+      "source": "FX/explosion_sheet.png",
+      "width": 1920,
+      "height": 960,
+      "sourceWidth": 2048,
+      "sourceHeight": 1024,
+      "bytes": 447262,
+      "sha256": "f4011486e3078657f1d7b8a0953dd320c003a96455f96354be12487f82cf90a9"
+    },
+    "damageSmoke": {
+      "file": "damageSmoke.webp",
+      "source": "FX/damage_smoke_sheet.png",
+      "width": 1134,
+      "height": 1080,
+      "sourceWidth": 1344,
+      "sourceHeight": 1280,
+      "bytes": 244594,
+      "sha256": "721c4f3efda93182856998cea9013235aa9b6c43e7b5730a8eeafb9c5050b766"
+    },
+    "beamStrip": {
+      "file": "beamStrip.webp",
+      "source": "FX/primary_beam_strip.png",
+      "width": 192,
+      "height": 64,
+      "sourceWidth": 192,
+      "sourceHeight": 64,
+      "bytes": 3412,
+      "sha256": "77ecc6c19153651464aee066b9eeec53d5cbe62360c48499264489f40f95bef9"
+    },
+    "beamMuzzle": {
+      "file": "beamMuzzle.webp",
+      "source": "FX/primary_beam_muzzle.png",
+      "width": 112,
+      "height": 64,
+      "sourceWidth": 112,
+      "sourceHeight": 64,
+      "bytes": 2692,
+      "sha256": "6b649af45cd29b4498eb83b90ae84550d35ab3208d531589a17ccb8a46d6f29f"
+    },
+    "impactPulse": {
+      "file": "impactPulse.webp",
+      "source": "FX/impact_pulse.png",
+      "width": 156,
+      "height": 126,
+      "sourceWidth": 156,
+      "sourceHeight": 126,
+      "bytes": 3736,
+      "sha256": "238c417ff473bfcfd333237c53a963ba4fc706db4c87336ed6eb4afda92ed317"
+    },
+    "impactLance": {
+      "file": "impactLance.webp",
+      "source": "FX/impact_lance.png",
+      "width": 194,
+      "height": 106,
+      "sourceWidth": 194,
+      "sourceHeight": 106,
+      "bytes": 4710,
+      "sha256": "f38b61a361c4ffe9cb79bc98f67d7c9516e793aae87949d6ee3f08d355cc9e2e"
+    },
+    "impactArc": {
+      "file": "impactArc.webp",
+      "source": "FX/impact_arc.png",
+      "width": 180,
+      "height": 154,
+      "sourceWidth": 180,
+      "sourceHeight": 154,
+      "bytes": 7336,
+      "sha256": "e792d553843d54eeb93a3304ddda4456c35a8367280eb6c17c686d21a81a5127"
+    },
+    "impactGatling": {
+      "file": "impactGatling.webp",
+      "source": "FX/impact_gatling.png",
+      "width": 176,
+      "height": 112,
+      "sourceWidth": 176,
+      "sourceHeight": 112,
+      "bytes": 8086,
+      "sha256": "d9538f8a749eff3b084add4b5595512c84dd744f0e3de4a2ba8ebd3e87ef7344"
+    },
+    "impactBeam": {
+      "file": "impactBeam.webp",
+      "source": "FX/impact_beam.png",
+      "width": 176,
+      "height": 112,
+      "sourceWidth": 176,
+      "sourceHeight": 112,
+      "bytes": 6516,
+      "sha256": "0029faf5334080c055e69f0ef6411e11049e4cd5c7003bcf78a07b13a3264cba"
+    },
+    "hull1": {
+      "file": "hull1.webp",
+      "source": "HD/hull_damage_1.png",
+      "width": 640,
+      "height": 242,
+      "sourceWidth": 1364,
+      "sourceHeight": 515,
+      "bytes": 3762,
+      "sha256": "9e9392c332ab12772634d6e2b1bea86fa7b865cd352b7603d13e201466591e34"
+    },
+    "hull2": {
+      "file": "hull2.webp",
+      "source": "HD/hull_damage_2.png",
+      "width": 640,
+      "height": 242,
+      "sourceWidth": 1364,
+      "sourceHeight": 515,
+      "bytes": 10166,
+      "sha256": "c9e4b0cd16ba8b7f41c3e2a0cc8189ebafc459e50fbb31ee5237ef060951d021"
+    },
+    "hull3": {
+      "file": "hull3.webp",
+      "source": "HD/hull_damage_3.png",
+      "width": 640,
+      "height": 242,
+      "sourceWidth": 1364,
+      "sourceHeight": 515,
+      "bytes": 12494,
+      "sha256": "f3c0c5e868df9a32772bfc39f5d9a5b244aab3fc475e3cc681104c3c03e76f26"
+    },
+    "dofFar": {
+      "file": "dofFar.webp",
+      "source": "HD/dof_far_04.png",
+      "width": 256,
+      "height": 256,
+      "sourceWidth": 256,
+      "sourceHeight": 256,
+      "bytes": 6316,
+      "sha256": "5873698ab858af6747bc174a48d6bf47ee556b088cb68ebcea8325f73735624b"
+    },
+    "dofMid": {
+      "file": "dofMid.webp",
+      "source": "HD/dof_mid_04.png",
+      "width": 256,
+      "height": 256,
+      "sourceWidth": 256,
+      "sourceHeight": 256,
+      "bytes": 7868,
+      "sha256": "cfd4c6b21e3b8fc2c74977b19a31fe415a938715c22835677feed818edc2f9e2"
+    },
+    "dofNear": {
+      "file": "dofNear.webp",
+      "source": "HD/dof_near_04.png",
+      "width": 256,
+      "height": 256,
+      "sourceWidth": 256,
+      "sourceHeight": 256,
+      "bytes": 9102,
+      "sha256": "fa658d526ff855c6227c86158a70307966dadecfc8fd753fcc227687ab3b86fa"
     }
   }
 }

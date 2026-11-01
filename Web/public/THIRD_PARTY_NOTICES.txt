@@ -1,6 +1,7 @@
 IRON NEBULA WEB — THIRD-PARTY NOTICES
-Game imagery remains attributed to the original Iron Nebula project. No original soundtrack is distributed.
+Game imagery remains attributed to the original Iron Nebula project. Propulsive Peak is the user-provided desktop soundtrack, included at the user's explicit request. Composer and third-party licensing are not independently verified; no Creative Commons or royalty-free license is asserted for that track. Procedural arcade music and effects contain no ROM samples.
 
+Noto Sans Display bitmap atlas: Copyright 2012 Google Inc. SIL Open Font License 1.1. See NOTO_FONT_LICENSE.txt.
 
 ========================================================================
 @msgpack/msgpack@2.8.0

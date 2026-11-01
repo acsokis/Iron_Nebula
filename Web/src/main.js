@@ -1,12 +1,14 @@
 import './style.css';
 import './phone.css';
+import './native.css';
 import {Renderer} from './renderer.js';
+import {NativeHud} from './native-hud.js';
 import {Input,icon} from './input.js';
 import {AudioEngine} from './audio.js';
 import {Network} from './network.js';
 import {PhoneBridge,runPhone} from './phone.js';
 import {cleanCode,cleanName,validIceServers} from './protocol.js';
-import {createWorld,addPlayer,startRun,stepWorld,neutralInput,validSnapshot,buyUpgrade,SHOP,COLORS,SECTORS,WEAPONS,clamp} from './world.js';
+import {createWorld,addPlayer,startRun,stepWorld,neutralInput,validSnapshot,migrateSoloSave,buyUpgrade,SHOP,COLORS,SECTORS,WEAPONS,clamp} from './world.js';
 
 const $=selector=>document.querySelector(selector),params=new URLSearchParams(location.search);
 const toast=message=>{const element=$('#toast');element.textContent=String(message).slice(0,240);element.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>element.hidden=true,6500);};
@@ -20,7 +22,8 @@ async function boot(){
   const canvas=$('#game'),manifest=await fetch(new URL('./assets/manifest.json',document.baseURI)).then(r=>{if(!r.ok)throw new Error('Game textures could not be loaded. Serve this game over HTTP(S).');return r.json();});
   const renderer=new Renderer(canvas,manifest),audio=new AudioEngine();
   await renderer.load(progress=>$('#loading-progress').value=progress);
-  let world=createWorld(),myId=0,mode='solo',overlay='menu',ready=false,difficulty=1;const overlayStack=[];
+  const nativeHud=new NativeHud($('#native-instruments'),renderer.textures.uiAtlas.image);
+  let world=createWorld(),myId=0,mode='solo',overlay='menu',ready=false,difficulty=1,endless=true;const overlayStack=[];
   let focused=0,lastPhase='lobby',inputSent=0,lastUi=0,lastHurt=0,lastSave=0,iceServers;
   let roomJoining=false,previousTime=performance.now(),accumulator=0,previousSnapshot=null;
   let previousSimulation=performance.now();
@@ -44,7 +47,7 @@ async function boot(){
   updateHints();document.body.dataset.profile='keyboard';
   function show(panel){
     overlay=panel;focused=0;
-    for(const id of ['menu','lobby','join','pause','settings','phone-pair'])$(`#${id}`).hidden=id!==panel;
+    for(const id of ['menu','lobby','join','pause','settings','phone-pair','about'])$(`#${id}`).hidden=id!==panel;
     if(document.activeElement instanceof HTMLElement&&!document.activeElement.getClientRects().length)document.activeElement.blur();
     input.mouse.active=false;input.stopRumble();highlight();
   }
@@ -52,10 +55,10 @@ async function boot(){
   function settings(){if(overlay==='settings'){closeOverlay();return;}overlayStack.push(overlay);show('settings');}
   function controls(){settings();$('.control-reference').scrollIntoView({block:'center'});}
   async function sound(){await audio.unlock().catch(()=>toast('Use the Sound button to enable browser audio.'));}
-  function resetSolo(){network.close();mode='solo';myId=0;world=createWorld();addPlayer(world,0,cleanName($('#callsign').value));ready=false;visual.clear();input.choice=-1;input.revision=0;previousSnapshot=null;audio.seen.clear();}
-  $('#solo').addEventListener('click',()=>{void sound();resetSolo();startRun(world,difficulty);show(null);});
-  $('#continue').addEventListener('click',()=>{try{const saved=JSON.parse(localStorage.getItem(saveKey));if(!validSnapshot(saved)||saved.players.length!==1||saved.players[0].id!==0||!['shop','playing'].includes(saved.phase))throw new Error('This browser save is not compatible.');resetSolo();world=saved;show(null);void sound();}catch(error){toast(error.message);}});
-  try{const saved=JSON.parse(localStorage.getItem(saveKey));$('#continue').disabled=!validSnapshot(saved)||saved.players.length!==1;}catch{}
+  function resetSolo(){network.close();mode='solo';myId=0;world=createWorld(crypto.getRandomValues(new Uint32Array(1))[0]||1);addPlayer(world,0,cleanName($('#callsign').value));ready=false;visual.clear();input.choice=-1;input.revision=0;previousSnapshot=null;audio.seen.clear();}
+  $('#solo').addEventListener('click',()=>{void sound();resetSolo();startRun(world,difficulty,endless);show(null);});
+  $('#continue').addEventListener('click',()=>{try{const saved=migrateSoloSave(JSON.parse(localStorage.getItem(saveKey)));if(!validSnapshot(saved)||saved.players.length!==1||saved.players[0].id!==0||!['shop','playing'].includes(saved.phase))throw new Error('This browser save is not compatible.');resetSolo();world=saved;show(null);void sound();}catch(error){toast(error.message);}});
+  try{const saved=migrateSoloSave(JSON.parse(localStorage.getItem(saveKey)));$('#continue').disabled=!validSnapshot(saved)||saved.players.length!==1;}catch{}
   $('#join-open').addEventListener('click',()=>{overlayStack.push(overlay);show('join');$('#join-code').focus();});
   $('#host').addEventListener('click',async()=>{
     if(roomJoining)return;roomJoining=true;void sound();resetSolo();mode='host';show('lobby');$('#room-code').textContent='OPENING…';
@@ -68,12 +71,20 @@ async function boot(){
     catch(error){network.close();mode='solo';show('join');toast(error.message);}finally{roomJoining=false;}
   });
   $('#join-code').addEventListener('keydown',event=>{if(event.key==='Enter')$('#join-confirm').click();});
-  $('#start-party').addEventListener('click',()=>{if(mode!=='host'||world.players.length<2){toast('Wait for at least one guest.');return;}startRun(world,difficulty);ready=false;show(null);network.broadcast(true);});
+  $('#start-party').addEventListener('click',()=>{if(mode!=='host'||world.players.length<2){toast('Wait for at least one guest.');return;}startRun(world,difficulty,endless);ready=false;show(null);network.broadcast(true);});
   function leave(){network.close();mode='solo';myId=0;ready=false;world=createWorld();addPlayer(world,0,'YOU');overlayStack.length=0;show('menu');$('#hud').hidden=true;$('#ending').hidden=true;$('#shop').hidden=true;input.release();visual.clear();}
   $('#leave-lobby').addEventListener('click',leave);$('#exit-run').addEventListener('click',leave);$('#replay').addEventListener('click',()=>{if(mode==='guest'){toast('Waiting for host to return to the lobby.');return;}
     if(mode==='host'){const seats=world.players.map(p=>({id:p.id,name:p.name}));world=createWorld();for(const seat of seats)addPlayer(world,seat.id,seat.name);show('lobby');network.broadcast(true);}else leave();});
   $('#pause-button').addEventListener('click',()=>{show('pause');});$('#resume').addEventListener('click',()=>show(null));
   $('#settings-toggle').addEventListener('click',settings);$('#pause-settings').addEventListener('click',settings);
+  $('#about-toggle').addEventListener('click',()=>{overlayStack.push(overlay);show('about');});
+  $('#about-settings').addEventListener('click',()=>{overlayStack.push(overlay);show('about');});
+  $('#tethered').addEventListener('change',event=>{input.tethered=event.target.checked;input.mouse.active=false;saveSettings();});
+  $('#flight-mode').addEventListener('change',event=>{endless=event.target.value==='orbit';saveSettings();});
+  document.addEventListener('pointerdown',()=>{void sound();},{once:true});
+  document.addEventListener('click',event=>{if(event.target.closest('button,summary')){void sound().then(()=>audio.ui('confirm'));}});
+  document.addEventListener('pointerover',event=>{if(event.target.closest('button'))audio.ui('navigate');});
+  document.addEventListener('change',event=>{if(event.target.matches('select,input[type=checkbox]'))audio.ui('confirm');});
   document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',closeOverlay));
   $('#fullscreen').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen?.();else $('#viewport').requestFullscreen?.().catch(()=>toast('Fullscreen is unavailable in this browser.'));});
   $('#sound-toggle').addEventListener('click',()=>{audio.enabled=!audio.enabled;if(audio.enabled)void sound();$('#sound-toggle').setAttribute('aria-pressed',String(audio.enabled));});
@@ -85,7 +96,8 @@ async function boot(){
     catch(error){$('#phone-state').textContent=error.message;}});
   $('#unpair').addEventListener('click',()=>{phone.close();phonePairing=null;input.select(input.padProfile??'keyboard');$('#phone-state').textContent='Unpaired. Old QR code no longer works.';$('#phone-qr').removeAttribute('src');$('#phone-code').textContent='';});
   $('#apply-ice').addEventListener('click',()=>{try{iceServers=validIceServers(JSON.parse($('#ice-config').value));toast('ICE settings applied for the next connection. They are not saved.');}catch(error){toast(error.message);}});
-  const saveSettings=()=>{try{localStorage.setItem(settingsKey,JSON.stringify({lighting:renderer.settings.lighting,gi:renderer.settings.gi,shadows:renderer.settings.shadows,hdr:renderer.settings.hdr,bloom:renderer.settings.bloom,fog:renderer.settings.fog,quality:renderer.settings.quality,sfx:audio.sfx,music:audio.music,vibration:$('#vibration').checked,difficulty}));}catch{}};
+  const saveSettings=()=>{try{localStorage.setItem(settingsKey,JSON.stringify({lighting:renderer.settings.lighting,gi:renderer.settings.gi,shadows:renderer.settings.shadows,hdr:renderer.settings.hdr,bloom:renderer.settings.bloom,fog:renderer.settings.fog,quality:renderer.settings.quality,sfx:audio.sfx,music:audio.music,musicSource:audio.musicSource,tethered:input.tethered,endless,vibration:$('#vibration').checked,difficulty}));}catch{}};
+  $('#music-source').addEventListener('change',event=>{audio.setMusicSource(event.target.value);saveSettings();});
   for(const key of ['lighting','gi','shadows'])$(`#${key}`).addEventListener('change',event=>{renderer.settings[key]=event.target.checked;saveSettings();});
   for(const key of ['bloom','fog'])$(`#${key}`).addEventListener('input',event=>{renderer.settings[key]=Number(event.target.value);saveSettings();});
   $('#quality').addEventListener('change',event=>{renderer.settings.quality=Number(event.target.value);renderer.resize();saveSettings();});
@@ -98,6 +110,9 @@ async function boot(){
   $('#sfx-volume').addEventListener('input',event=>{audio.sfx=Number(event.target.value);saveSettings();});$('#music-volume').addEventListener('input',event=>{audio.music=Number(event.target.value);saveSettings();});
   $('#difficulty').addEventListener('change',event=>{difficulty=Number(event.target.value);saveSettings();});$('#vibration').addEventListener('change',saveSettings);
   try{const saved=JSON.parse(localStorage.getItem(settingsKey));if(saved&&typeof saved==='object'){
+    if(typeof saved.tethered==='boolean')input.tethered=saved.tethered;$('#tethered').checked=input.tethered;
+    if(typeof saved.endless==='boolean')endless=saved.endless;$('#flight-mode').value=endless?'orbit':'campaign';
+    audio.setMusicSource(saved.musicSource==='chip'?'chip':'desktop');$('#music-source').value=audio.musicSource;
     for(const key of ['lighting','gi','shadows'])if(typeof saved[key]==='boolean'){renderer.settings[key]=saved[key];$(`#${key}`).checked=saved[key];}
     for(const key of ['bloom','fog'])if(Number.isFinite(saved[key])){renderer.settings[key]=clamp(saved[key],0,key==='bloom'?1.5:1);$(`#${key}`).value=renderer.settings[key];}
     if([1,.75,.5].includes(saved.quality)){renderer.settings.quality=saved.quality;$('#quality').value=saved.quality;renderer.resize();}
@@ -105,7 +120,8 @@ async function boot(){
     if(Number.isFinite(saved.music)){audio.music=clamp(saved.music,0,1);$('#music-volume').value=audio.music;}if(Number.isFinite(saved.sfx)){audio.sfx=clamp(saved.sfx,0,1);$('#sfx-volume').value=audio.sfx;}
     if(typeof saved.vibration==='boolean')$('#vibration').checked=saved.vibration;if([0,1,2].includes(saved.difficulty)){difficulty=saved.difficulty;$('#difficulty').value=difficulty;}
   }}catch{}
-  const resize=new ResizeObserver(()=>renderer.resize());resize.observe($('#viewport'));
+  function resizeWorld(){renderer.resize();const v=renderer.viewport;$('#native-instruments').style.transform=`translate(${v.x}px,${v.y}px) scale(${v.width/1920})`;}
+  const resize=new ResizeObserver(resizeWorld);resize.observe($('#viewport'));resizeWorld();
   function refreshLobby(){
     $('#room-code').textContent=network.code||'CONNECTING…';$('#start-party').hidden=mode!=='host';$('#start-party').disabled=world.players.length<2;
     const holder=$('#seats');holder.replaceChildren();
@@ -121,22 +137,26 @@ async function boot(){
       button.addEventListener('click',()=>{if(buyUpgrade(world,item.id)){void sound();audio.tone(780,.1,'triangle',.08,1100);renderShop();network.broadcast(true);}else toast('Upgrade unavailable or already at maximum.');});list.append(button);}
   }
   function updateUi(){
+    nativeHud.draw(world,myId);
     $('#hud').hidden=!['playing','shop'].includes(world.phase);
     $('#connection-state').textContent=mode==='solo'?'LOCAL FLIGHT':mode==='host'?`HOST · ${world.players.length}/6 PILOTS`:`P2P · P${myId+1}`;
     if(world.phase!==lastPhase){
+      if(mode==='solo'&&['gameover','victory'].includes(world.phase)){try{localStorage.removeItem(saveKey);}catch{}$('#continue').disabled=true;}
       if(world.phase==='playing'){show(null);$('#shop').hidden=true;$('#ending').hidden=true;ready=false;}
       if(world.phase==='shop'){show(null);$('#shop').hidden=false;renderShop();ready=false;}
       if(['gameover','victory'].includes(world.phase)){show(null);$('#shop').hidden=true;$('#ending').hidden=false;$('#ending-label').textContent=world.phase==='victory'?'CAMPAIGN SECURED':'SIGNAL LOST';$('#ending-title').textContent=world.phase==='victory'?'You lit up the void.':'One more flight?';$('#ending-score').textContent=`${world.score.toLocaleString()} points · ${world.kills} targets`;$('#replay').disabled=mode==='guest';}
       if(world.phase==='lobby'&&mode!=='solo'){show('lobby');$('#shop').hidden=true;$('#ending').hidden=true;}
       lastPhase=world.phase;
     }
-    const sector=SECTORS[world.sector-1];$('#sector-number').textContent=`SECTOR 0${world.sector}`;$('#sector-name').textContent=sector.name;$('#score').textContent=String(world.score).padStart(6,'0');$('#credits').textContent=`${world.credits} CR`;
+    const sector=SECTORS[world.sector-1];$('#sector-number').textContent=`0${world.sector}`;$('#sector-name').textContent=sector.name;$('#score').textContent=String(world.score).padStart(7,'0');$('#credits').textContent=`CR ${String(world.credits).padStart(5,'0')}`;
+    document.body.dataset.party=String(world.players.length);$('#native-wave').textContent=`${world.endless?`ORBIT ${(world.orbit??0)+1} · `:''}WAVE ${String(world.wave).padStart(2,'0')}`;
     const own=world.players.find(p=>p.id===myId);if(own){$('#weapon-name').textContent=WEAPONS[own.weapon].name;$('#weapon-level').textContent=`LEVEL ${own.level} / 7`;
+      $('#native-lives').textContent=String(own.lives).padStart(2,'0');$('#native-hull').textContent=`HP ${own.health}/${own.maxHealth}`;$('#native-shield').max=own.maxShield;$('#native-shield').value=own.shield;
       if(own.hurt>lastHurt&&$('#vibration').checked)input.rumble();lastHurt=own.hurt;}
     const boss=world.enemies.find(e=>e.kind==='boss');$('#boss-hud').hidden=!boss;if(boss){$('#boss-name').textContent=boss.name;$('#boss-health').value=boss.health/boss.maxHealth;}
     const party=$('#party-hud');party.replaceChildren();for(const p of world.players){const panel=document.createElement('div');panel.className='pilot-hud';panel.style.setProperty('--pilot',COLORS[p.id]);
       const name=document.createElement('b'),bar=document.createElement('progress'),stats=document.createElement('span');name.className='pilot-name';name.textContent=`P${p.id+1} ${p.id===myId?'YOU':p.name}`;bar.max=p.maxHealth;bar.value=p.health;stats.textContent=p.lives>0?`HULL ${p.health}/${p.maxHealth} · ♥ ${p.lives} · ◇ ${p.shield}`:'SPECTATING';panel.append(name,bar,stats);party.append(panel);}
-    if(world.phase==='shop'){const row=$('#ready-list');row.replaceChildren();for(const p of world.players){const tag=document.createElement('span');tag.className='ready-pilot'+((p.id===myId?ready:p.ready)?' ready':'');tag.textContent=`P${p.id+1} ${(p.id===myId?ready:p.ready)?'READY':'WAITING'}`;row.append(tag);}$('#ready-text').textContent=ready?'Ready — waiting for the wing':world.sector===3?'Ready to finish campaign':'Ready for next sector';}
+    if(world.phase==='shop'){const row=$('#ready-list');row.replaceChildren();for(const p of world.players){const tag=document.createElement('span');tag.className='ready-pilot'+((p.id===myId?ready:p.ready)?' ready':'');tag.textContent=`P${p.id+1} ${(p.id===myId?ready:p.ready)?'READY':'WAITING'}`;row.append(tag);}$('#ready-text').textContent=ready?'Ready — waiting for the wing':world.sector===3?(world.endless?'Ready for next orbit':'Ready to finish campaign'):'Ready for next sector';}
     if(overlay==='lobby')refreshLobby();
     $('#pause-note').textContent=mode==='solo'?'Your solo flight is paused.':'Only your input is paused. The wing keeps flying.';
     $('#fx-state').textContent=[renderer.settings.hdr?'HDR LIGHTS':'SDR',renderer.settings.gi?'GI':null,renderer.settings.lighting?'LIGHTING':null].filter(Boolean).join(' · ');
@@ -145,10 +165,10 @@ async function boot(){
     return root?[...root.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea')].filter(e=>e.getClientRects().length):[];}
   function highlight(){document.querySelectorAll('.focused-control').forEach(e=>e.classList.remove('focused-control'));const items=visibleControls();if(items.length){focused=(focused+items.length)%items.length;items[focused].classList.add('focused-control');}}
   function action(name){
-    if(['up','down','confirm','back'].includes(name))audio.tone(name==='confirm'?700:420,.035,'square',.018,210);
+    if(['up','down','confirm','back'].includes(name)){void sound().then(()=>audio.ui(name==='confirm'?'confirm':'navigate'));}
     if(name==='settings'){settings();return;}if(name==='help'){controls();return;}
     if(name==='pause'){if(world.phase==='shop'){ready=!ready;return;}if(overlay==='pause')show(null);else if(world.phase==='playing')show('pause');return;}
-    if(name==='back'){if(['settings','phone-pair','join'].includes(overlay))closeOverlay();else if(overlay==='pause')show(null);else if(overlay==='lobby')leave();else if(world.phase==='playing')show('pause');return;}
+    if(name==='back'){if(['settings','phone-pair','join','about'].includes(overlay))closeOverlay();else if(overlay==='pause')show(null);else if(overlay==='lobby')leave();else if(world.phase==='playing')show('pause');return;}
     if(name==='ready'&&world.phase==='shop'){ready=!ready;return;}
     if(!overlay&&world.phase==='playing'&&['next','previous'].includes(name)){input.weapon(world,myId,name==='next'?1:-1);return;}
     if(!overlay&&world.phase==='playing'&&name.startsWith('weapon')){input.weapon(world,myId,0,Number(name.at(-1)));return;}
@@ -161,11 +181,12 @@ async function boot(){
   $('#loading').hidden=true;updateUi();
   const qa=import.meta.env.DEV&&params.get('test')==='1';
   if(qa)window.__IRON_NEBULA__={state:()=>structuredClone(world),network:()=>network.diagnostics(),renderer:()=>renderer.diagnostics(),profile:()=>input.profile,
-    drive:value=>{scriptedInput=value;},audio:()=>({state:audio.context?.state??'locked',enabled:audio.enabled,sfx:audio.sfx,music:audio.music}),
+    drive:value=>{scriptedInput=value;},audio:()=>({state:audio.context?.state??'locked',enabled:audio.enabled,sfx:audio.sfx,music:audio.music,source:audio.musicSource,desktopPlaying:!!audio.desktop&&!audio.desktop.paused,desktopTime:audio.desktop?.currentTime??0,desktopFailed:!!audio.desktopFailed}),
     phone:()=>({paired:!!phone.connection?.open,code:phone.code,input:structuredClone(input.phone.input)}),
+    control:()=>({tethered:input.tethered,input:input.read(world,myId,false,ready),dragPointer:input.dragPointer}),
     scenario:options=>{if(mode==='guest')throw new Error('Host authority only');if(options.phase)world.phase=options.phase;if(options.credits!==undefined)world.credits=options.credits;
       if(options.unlocked)world.unlocked=options.unlocked;if(options.sectorTime!==undefined)world.sectorTime=options.sectorTime;if(options.bossStage!==undefined)world.bossStage=options.bossStage;
-      if(options.enemies!==undefined)world.enemies=structuredClone(options.enemies);if(options.level)world.players.forEach(p=>{p.level=options.level;p.health=p.maxHealth=100;p.invuln=1000;});network.broadcast(true);},
+      if(options.enemies!==undefined)world.enemies=structuredClone(options.enemies);if(options.pickups!==undefined)world.pickups=structuredClone(options.pickups);if(options.orbit!==undefined)world.orbit=options.orbit;if(options.sector!==undefined)world.sector=options.sector;if(options.level)world.players.forEach(p=>{p.level=options.level;p.health=p.maxHealth=100;p.invuln=1000;});network.broadcast(true);},
     renderFrame:()=>renderer.render(world,myId),version:'dev-only'};
   function simulationTick(){
     const now=performance.now(),dt=Math.min(.1,(now-previousSimulation)/1000);previousSimulation=now;phone.tick();

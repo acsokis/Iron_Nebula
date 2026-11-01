@@ -20,7 +20,7 @@ malware-free guarantee or proof of third-party service reliability.
 | Local browser storage | Solo state and settings only. Compatibility/shape/bounds checks before use. Native Windows saves/settings are not read or modified. |
 | Static content | Same-origin bundled runtime scripts/assets. CSP blocks external scripts, eval, inline handlers, objects and form submission. Referrer policy is no-referrer. No camera/microphone request. |
 | Dependency/install chain | Exact direct versions, npm lock integrity/source checks, reproducible `npm ci --ignore-scripts`, advisory audit, third-party notices. |
-| Build/artifact | Production build removes test mutation hooks/local signaling overrides. Safe relative paths, no symlinks, approved file types/size budget, SHA256 for assets and all release files. No maps, native executables, user saves, tokens, caches or original soundtrack. |
+| Build/artifact | Production build removes test mutation hooks/local signaling overrides. Safe relative paths, no symlinks, approved file types/size budget, SHA256 for assets and all release files. No maps, native executables, user saves, tokens or caches. The explicitly requested desktop MP3 is the sole allowed audio payload, pinned to its source SHA256. |
 
 ## Issues found and addressed during implementation
 
@@ -55,6 +55,14 @@ malware-free guarantee or proof of third-party service reliability.
   throttling are used only by the test harness; they are not performance evidence.
 - `npm audit` checks the current known advisory database. A zero finding is not
   proof that packages, upstream code or the browser have no unknown vulnerabilities.
+
+The 0.9.14 checks also exercise continuous Chromium touch dragging (rather than
+mouse-only emulation), pointer release, optional/default-on tether control,
+native soundtrack playback, persisted music/control settings, credits UI,
+mirrored background coverage, repeated endless-orbit sector wraps and migration
+of 0.9.13 solo campaign saves. The soundtrack MP3 is served same-origin and
+streamed through an HTML audio element; its SHA256 is checked before deployment.
+No external music service or audio package lifecycle script is introduced.
 
 ## Release verification
 

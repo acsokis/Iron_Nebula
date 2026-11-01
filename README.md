@@ -1,6 +1,11 @@
 # IRON NEBULA
 
-**Browser edition 0.9.13:** a static WebGL 2 adaptation with up to six players over
+**Browser edition 0.9.14:** a roguelike bullet-hell space arcade adaptation with
+Endless Orbit, the native side-view ship/cockpit/effect/pickup artwork, scrolling
+parallax backgrounds and optional default-on tethered pointer flight. Touch drag
+continuously steers the ship. The original desktop soundtrack is available along
+with original synthesized Atari-style effects and optional chiptune music.
+About credits name both contributors and their roles. Up to six players connect over
 WebRTC, phone controllers, automatic Xbox/PlayStation button icons, dynamic lighting,
 2D GI, bloom, fog, smoke and synthesized chip audio. HDR lighting and experimental
 HDR display output are capability-gated. See [browser setup and controls](Web/README.md)

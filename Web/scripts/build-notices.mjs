@@ -1,8 +1,9 @@
 import {readFile,writeFile,readdir} from 'node:fs/promises';
 import {resolve,relative,join} from 'node:path';
 const root=resolve('node_modules'),lock=JSON.parse(await readFile('package-lock.json','utf8'));
-const notices=['IRON NEBULA WEB — THIRD-PARTY NOTICES','Game imagery remains attributed to the original Iron Nebula project. No original soundtrack is distributed.',''];
+const notices=['IRON NEBULA WEB — THIRD-PARTY NOTICES','Game imagery remains attributed to the original Iron Nebula project. Propulsive Peak is the user-provided desktop soundtrack, included at the user\'s explicit request. Composer and third-party licensing are not independently verified; no Creative Commons or royalty-free license is asserted for that track. Procedural arcade music and effects contain no ROM samples.',''];
 const inventory=[];
+notices.push('Noto Sans Display bitmap atlas: Copyright 2012 Google Inc. SIL Open Font License 1.1. See NOTO_FONT_LICENSE.txt.');
 for(const [path,entry]of Object.entries(lock.packages)){
   if(!path||entry.dev||entry.devOptional)continue;
   const dir=resolve(path);if(relative(root,dir).startsWith('..'))throw new Error('Package outside node_modules.');

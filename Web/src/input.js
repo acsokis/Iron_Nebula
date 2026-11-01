@@ -4,7 +4,7 @@ export class Input{
     this.canvas=canvas;this.onProfile=onProfile;this.profile='keyboard';this.keys=new Set();this.queue=[];this.seq=0;this.revision=0;this.choice=-1;
     this.mouse={x:300,y:540,active:false,fire:false,precision:false};this.padIndex=-1;this.pad=null;this.oldPadButtons=[];this.oldAxes=[];
     this.phone={input:neutralInput(),buttons:[],last:0};this.navHeld='';this.navNext=0;
-    this.active=document.hasFocus();
+    this.active=document.hasFocus();this.tethered=true;this.dragPointer=null;
     window.addEventListener('keydown',event=>{
       if(['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName))return;
       this.keys.add(event.code);this.select('keyboard');
@@ -16,13 +16,14 @@ export class Input{
     window.addEventListener('keyup',event=>this.keys.delete(event.code));
     const point=event=>{const rect=canvas.getBoundingClientRect(),fit=Math.min(rect.width/1920,rect.height/1080),ox=(rect.width-1920*fit)/2,oy=(rect.height-1080*fit)/2;
       this.mouse.x=clamp((event.clientX-rect.left-ox)/fit,100,1800);this.mouse.y=clamp((event.clientY-rect.top-oy)/fit,160,950);};
-    canvas.addEventListener('pointermove',event=>{if(event.pointerType==='mouse'||event.buttons){point(event);this.mouse.active=true;this.select('keyboard');}});
-    canvas.addEventListener('pointerdown',event=>{point(event);this.mouse.active=true;if(event.button===0)this.mouse.fire=true;if(event.button===2)this.mouse.precision=true;this.select('keyboard');});
-    window.addEventListener('pointerup',()=>{this.mouse.fire=this.mouse.precision=false;});canvas.addEventListener('contextmenu',event=>event.preventDefault());
+    canvas.addEventListener('pointermove',event=>{if(event.pointerType==='mouse'||event.pointerId===this.dragPointer){if(event.cancelable)event.preventDefault();point(event);this.mouse.active=true;this.select('keyboard');}});
+    canvas.addEventListener('pointerdown',event=>{if(event.pointerType!=='mouse'){if(this.dragPointer!==null)return;this.dragPointer=event.pointerId;canvas.setPointerCapture(event.pointerId);if(event.cancelable)event.preventDefault();}point(event);this.mouse.active=true;if(event.button===0)this.mouse.fire=true;if(event.button===2)this.mouse.precision=true;this.select('keyboard');});
+    const endPointer=event=>{if(event.pointerType!=='mouse'&&event.pointerId!==this.dragPointer)return;if(event.pointerId===this.dragPointer)this.dragPointer=null;this.mouse.fire=this.mouse.precision=false;if(event.type==='pointercancel')this.mouse.active=false;};
+    window.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);canvas.addEventListener('lostpointercapture',endPointer);canvas.addEventListener('contextmenu',event=>event.preventDefault());
     window.addEventListener('blur',()=>{this.active=false;this.release();});window.addEventListener('focus',()=>{this.active=true;});document.addEventListener('visibilitychange',()=>{if(document.hidden)this.release();});
   }
   select(profile){if(this.profile!==profile){this.profile=profile;this.navHeld='';this.navBlocked=false;this.onProfile(profile);}}
-  release(){this.keys.clear();this.mouse.fire=this.mouse.precision=false;this.mouse.active=false;this.phone={input:neutralInput(),buttons:[],last:0};this.stopRumble();}
+  release(){this.keys.clear();this.mouse.fire=this.mouse.precision=false;this.mouse.active=false;this.dragPointer=null;this.phone={input:neutralInput(),buttons:[],last:0};this.stopRumble();}
   setPhone(input,buttons){
     const old=this.phone.buttons;this.phone={input,buttons,last:performance.now()};
     if(Math.hypot(input.x,input.y)>.1||buttons.some((b,i)=>b&&!old[i]))this.select('phone');
@@ -67,7 +68,10 @@ export class Input{
     result.x=x;result.y=y;result.fire=keyboard&&(this.keys.has('Space')||this.mouse.fire)||!!buttons[2]||!!buttons[7];
     result.precision=keyboard&&(this.keys.has('ShiftLeft')||this.keys.has('ShiftRight')||this.mouse.precision)||!!buttons[6];
     if(Math.hypot(x,y)>.01)this.mouse.active=false;
-    if(this.mouse.active&&this.profile==='keyboard'&&Math.hypot(x,y)<.01)result.target={x:this.mouse.x,y:this.mouse.y};
+    if(this.mouse.active&&this.profile==='keyboard'&&Math.hypot(x,y)<.01){
+      if(this.tethered)result.target={x:this.mouse.x,y:this.mouse.y};
+      else{const pilot=world.players.find(p=>p.id===id);if(pilot){result.x=clamp((this.mouse.x-pilot.x)/100,-1,1);result.y=clamp((this.mouse.y-pilot.y)/100,-1,1);}}
+    }
     return result;
   }
   weapon(world,id,direction,absolute=-1){const p=world.players.find(p=>p.id===id);if(!p)return;

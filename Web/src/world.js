@@ -16,8 +16,8 @@ export const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const distance=(a,b)=>(a.x-b.x)**2+(a.y-b.y)**2;
 function random(w){let x=w.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;w.rng=x;return (x>>>0)/4294967296;}
 const roll=(w,a,b)=>a+random(w)*(b-a);
-export function createWorld(seed=87321){return {schema:1,build:'0.9.13-web',tick:0,rng:seed||1,nextId:1,
-  phase:'lobby',sector:1,sectorTime:0,time:0,difficulty:1,bossStage:0,waveTimer:1,wave:0,
+export function createWorld(seed=87321){return {schema:1,build:'0.9.14-web',tick:0,rng:seed||1,nextId:1,
+  phase:'lobby',sector:1,sectorTime:0,time:0,difficulty:1,bossStage:0,waveTimer:1,wave:0,endless:false,orbit:0,
   score:0,credits:0,earned:0,unlocked:1,kills:0,players:[],enemies:[],shots:[],rocks:[],pickups:[],fx:[],
   upgrades:{engine:0,power:0,drone:0,magnet:0},sectorKills:0};}
 export function addPlayer(w,id,name='PILOT'){
@@ -26,9 +26,9 @@ export function addPlayer(w,id,name='PILOT'){
     vx:0,vy:0,health:4,maxHealth:4,shield:2,maxShield:3,lives:3,level:1,weapon:0,timer:0,invuln:2,
     drone:false,droneTimer:0,beam:false,beamEnd:1800,ready:false,damage:0,hurt:0,revision:0});return true;
 }
-export function startRun(w,difficulty=1){
+export function startRun(w,difficulty=1,endless=false){
   const seats=w.players.map(p=>({id:p.id,name:p.name})),fresh=createWorld(w.rng);
-  Object.assign(w,fresh);w.difficulty=clamp(difficulty|0,0,2);
+  Object.assign(w,fresh);w.difficulty=clamp(difficulty|0,0,2);w.endless=!!endless;
   for(const seat of seats)addPlayer(w,seat.id,seat.name);
   w.phase='playing';return w;
 }
@@ -60,7 +60,7 @@ function fire(w,p){
 }
 function spawnEnemy(w,boss=0){
   const kind=boss?'boss':['scout','interceptor','heavy'][Math.floor(random(w)*3)],tier=boss===2?2:1;
-  const factor=[.78,1,1.32][w.difficulty]*(1+.65*(w.players.length-1));
+  const factor=[.78,1,1.32][w.difficulty]*(1+.65*(w.players.length-1))*(1+Math.min(20,w.orbit??0)*.15);
   const hp=Math.ceil((boss?(boss===2?145:75):kind==='heavy'?5:kind==='interceptor'?3:2)*(1+.35*(w.sector-1))*factor);
   const e={id:w.nextId++,kind,boss:tier,bossType:boss,x:boss?1770:2020,y:boss?540:roll(w,220,890),baseY:roll(w,260,820),
     radius:boss?(boss===2?155:120):kind==='heavy'?48:34,health:hp,maxHealth:hp,
@@ -100,8 +100,9 @@ export function stepWorld(w,inputs,dt=1/60){
   for(const p of w.players)p.ready=!!inputs[p.id]?.ready;
   if(w.phase==='shop'){
     if(w.players.length&&w.players.every(p=>p.ready)){
-      if(w.sector===3){w.phase='victory';return;}
-      w.sector++;w.sectorTime=0;w.bossStage=0;w.earned=0;w.wave=0;w.sectorKills=0;w.waveTimer=1;w.phase='playing';
+      if(w.sector===3&&!w.endless){w.phase='victory';return;}
+      if(w.sector===3){w.sector=1;w.orbit=(w.orbit??0)+1;}else w.sector++;
+      w.sectorTime=0;w.bossStage=0;w.earned=0;w.wave=0;w.sectorKills=0;w.waveTimer=1;w.phase='playing';
       w.enemies=[];w.shots=[];w.rocks=[];w.pickups=[];
       for(const p of w.players){p.ready=false;p.x=280+(p.id%2)*180;p.y=250+Math.floor(p.id/2)*270;p.invuln=3;
         if(p.lives<=0){p.lives=1;p.health=p.maxHealth;}}
@@ -141,9 +142,16 @@ export function stepWorld(w,inputs,dt=1/60){
     else {e.x-=e.speed*dt;e.y+=Math.sin(e.age*2.3+e.phase)*dt*65;}
     const target=alive[Math.floor((e.id+w.time/3)%alive.length)];
     if(e.timer<=0&&e.x<1900&&target){
-      const angle=Math.atan2(target.y-e.y,target.x-e.x),count=e.kind==='boss'?5+(e.health<e.maxHealth*.5?4:0):e.kind==='heavy'?3:1;
-      for(let j=0;j<count;j++)enemyShot(w,e,angle+(j-(count-1)/2)*.14,320+w.sector*25,e.kind==='boss'?12:8);
-      e.timer=e.kind==='boss'?.75:2.2;
+      const angle=Math.atan2(target.y-e.y,target.x-e.x),boss=e.kind==='boss',pattern=boss?Math.floor(e.age/5)%3:0;
+      const count=boss?(pattern===0?(e.health<e.maxHealth*.5?11:7):18):e.kind==='heavy'?3:1;
+      for(let j=0;j<count;j++){
+        const direction=pattern===0?angle+(j-(count-1)/2)*(boss?.11:.14):e.age*.58+j*Math.PI*2/count;
+        // Ring pattern deliberately leaves a readable lane toward the pilot.
+        const delta=Math.atan2(Math.sin(direction-angle),Math.cos(direction-angle));
+        if(pattern===2&&Math.abs(delta)<.28)continue;
+        enemyShot(w,e,direction,boss?(pattern===0?290:225)+w.sector*20:320+w.sector*25,boss?9:8);
+      }
+      e.timer=boss?(pattern===0?.65:.9):2.2;
     }
     for(const p of alive)if(distance(e,p)<(e.radius+28)**2)hurtPlayer(w,p);
   }
@@ -189,10 +197,12 @@ export function buyUpgrade(w,id,requester=0){
   else {if(w.upgrades[id]>=3)return false;w.upgrades[id]++;}
   w.credits-=item.price;return true;
 }
+export function migrateSoloSave(w){return w?.schema===1&&w.build==='0.9.13-web'?{...w,build:'0.9.14-web',endless:false,orbit:0}:w;}
 export function validSnapshot(w){
   const number=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max,integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
   const point=o=>o&&number(o.x,-5000,5000)&&number(o.y,-3000,3000),id=o=>integer(o.id,1,Number.MAX_SAFE_INTEGER),color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
-  if(!w||w.schema!==1||w.build!=='0.9.13-web'||!integer(w.tick,0,Number.MAX_SAFE_INTEGER)||!['lobby','playing','shop','gameover','victory'].includes(w.phase)||
+  if(w&&(w.endless!==undefined&&typeof w.endless!=='boolean'||w.orbit!==undefined&&!integer(w.orbit,0,1000000)))return false;
+  if(!w||w.schema!==1||w.build!=='0.9.14-web'||!integer(w.tick,0,Number.MAX_SAFE_INTEGER)||!['lobby','playing','shop','gameover','victory'].includes(w.phase)||
     !integer(w.sector,1,3)||!integer(w.difficulty,0,2)||!number(w.time,0,1e8)||!number(w.sectorTime,0,1e8)||!integer(w.unlocked,1,31)||
     !number(w.score,0,1e12)||!number(w.credits,0,1e9)||!w.upgrades||!['engine','power','drone','magnet'].every(k=>integer(w.upgrades[k],0,3)))return false;
   if(!['players','enemies','shots','rocks','pickups','fx'].every(k=>Array.isArray(w[k])&&w[k].length<=({players:6,enemies:64,shots:600,rocks:64,pickups:200,fx:100}[k])))return false;
