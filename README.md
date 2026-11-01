@@ -54,6 +54,7 @@ A projekt Windowsra készült; a fő projektfájl: `IronNebula.csproj`. A MonoGa
 - **Nehézség:** Easy / Normal / Hard; New Game indításakor választható.
 - **Kijelző:** nagy betűk, F1 Help, F10 diagnosztika, testreszabható SFX/music hangerő.
 - **Megjelenítés:** 16:9 / 16:10, 720p–4K választható módok, MSAA, lövedékglow, találat utáni rövid blur/rázkódás, ablakméret monitorhoz illesztése.
+- **Hajó- és ellenfélhull:** a textúra alfájához igazodó metallic backing marad a sprite alatt, amikor a voxel-hull sérül.
 - **Irányítás:** billentyűzet, egér (hajó közvetlenül a kurzornál), kontroller; a menük egérrel is használhatók.
 
 ## Projektstruktúra

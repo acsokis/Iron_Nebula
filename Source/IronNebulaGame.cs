@@ -3286,7 +3286,7 @@ private void DrawShop()
             float scale=(rock.Radius*2f)/tex.Width;
             int maximum=rock.IsRiftShard?(rock.Radius>56?4:3):(rock.Radius>58?4:2);
             _voxelVisuals.Draw(_batch,rock.VisualId,tex,rock.Position,_infernoActive?new Color(255,176,121):Color.White,rock.Rotation,
-                new Vector2(tex.Width*.5f,tex.Height*.5f),scale,SpriteEffects.None,rock.Health/(float)maximum);
+                new Vector2(tex.Width*.5f,tex.Height*.5f),scale,SpriteEffects.None,rock.Health/(float)maximum,metallicFrame:false);
         }
         foreach(LaserLane lane in _laserLanes)
         {

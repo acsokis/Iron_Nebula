@@ -22,6 +22,7 @@ internal sealed class VoxelVisuals : IDisposable
     }
     private sealed record Shard(Texture2D Texture,Rectangle Source,Vector2 Position,Vector2 Velocity,float Rotation,float Spin,float Scale,float Born,float Life);
     private readonly Dictionary<Texture2D,Topology> _topologies=new();
+    private readonly Dictionary<Texture2D,(Texture2D Texture,float Scale)> _metallicFrames=new();
     private readonly Dictionary<object,Body> _bodies=new();
     private readonly List<Shard> _shards=new();
     private Texture2D? _shield;
@@ -51,7 +52,7 @@ internal sealed class VoxelVisuals : IDisposable
     }
     public void Begin(float time,float dt){_time=time;_dt=Math.Clamp(dt,0,.1f);_frame++;}
     public void Clear(){_bodies.Clear();_shards.Clear();}
-    public void Draw(SpriteBatch batch,object key,Texture2D texture,Vector2 position,Color tint,float rotation,Vector2 origin,float scale,SpriteEffects effects,float fraction,bool shield=false)
+    public void Draw(SpriteBatch batch,object key,Texture2D texture,Vector2 position,Color tint,float rotation,Vector2 origin,float scale,SpriteEffects effects,float fraction,bool shield=false,bool metallicFrame=true)
     {
         var topology=GetTopology(texture);int keep=ShieldSpectrum.VoxelCount(fraction,topology.Cells.Count);
         if(!_bodies.TryGetValue(key,out var body)||body.Topology!=topology)
@@ -60,6 +61,11 @@ internal sealed class VoxelVisuals : IDisposable
         if(shield && keep!=body.Keep){body.Spectrum!.Impulse(.5f,keep>body.Keep?.65f:1.4f);body.Flash=1;}
         body.Frame=_frame;body.Keep=keep;body.Position=position;body.Origin=origin;body.Rotation=rotation;body.Scale=scale;body.Effects=effects;
         if(body.Spectrum!=null){body.Spectrum.Step(_dt);body.Flash*=MathF.Exp(-_dt*4);}
+        if(metallicFrame&&!shield&&keep>0)
+        {
+            var frame=GetMetallicFrame(texture);
+            batch.Draw(frame.Texture,position,null,Color.White,rotation,origin*frame.Scale,scale/frame.Scale*1.075f,effects,0);
+        }
         if(keep==topology.Cells.Count && !shield)
         {batch.Draw(texture,position,null,tint,rotation,origin,scale,effects,0);return;}
         for(int i=0;i<keep;i++)
@@ -74,6 +80,27 @@ internal sealed class VoxelVisuals : IDisposable
             Vector2 center=position+Rotate(local,rotation);
             batch.Draw(texture,center,source,shield?Color.Lerp(tint,Color.White,body.Flash*.6f):tint,rotation,new Vector2(source.Width*.5f,source.Height*.5f),scale,effects,0);
         }
+    }
+    private (Texture2D Texture,float Scale) GetMetallicFrame(Texture2D texture)
+    {
+        if(_metallicFrames.TryGetValue(texture,out var cached))return cached;
+        const int maximumDimension=512;
+        float factor=Math.Min(1f,maximumDimension/(float)Math.Max(texture.Width,texture.Height));
+        int width=Math.Max(1,(int)MathF.Round(texture.Width*factor)),height=Math.Max(1,(int)MathF.Round(texture.Height*factor));
+        var source=new Color[texture.Width*texture.Height];texture.GetData(source);
+        var pixels=new Color[width*height];
+        for(int y=0;y<height;y++)for(int x=0;x<width;x++)
+        {
+            int sx=Math.Min(texture.Width-1,(int)(x/factor)),sy=Math.Min(texture.Height-1,(int)(y/factor));
+            int i=y*width+x;Color pixel=source[sy*texture.Width+sx];
+            if(pixel.A==0)continue;
+            float band=.5f+.5f*MathF.Cos(x/(float)width*MathF.Tau*5f);
+            float shade=Math.Clamp(.24f+.58f*band+.12f*(1-y/(float)Math.Max(1,height-1)),.2f,.96f);
+            pixels[i]=new Color(shade*.72f,shade*.88f,shade,pixel.A/255f);
+        }
+        var frameTexture=new Texture2D(texture.GraphicsDevice,width,height);frameTexture.SetData(pixels);
+        cached=(frameTexture,factor);
+        _metallicFrames[texture]=cached;return cached;
     }
     private static Vector2 Rotate(Vector2 p,float a)=>new(p.X*MathF.Cos(a)-p.Y*MathF.Sin(a),p.X*MathF.Sin(a)+p.Y*MathF.Cos(a));
     private static Vector2 CellCenter(Body body,Rectangle source)
@@ -127,5 +154,10 @@ internal sealed class VoxelVisuals : IDisposable
         for(int i=0;i<output.Length;i++){float d=distance[i],a=d>0?Math.Clamp((13-d)/6,0,1):0;output[i]=new Color(.32f*a,.86f*a,a,a);}
         var texture=new Texture2D(hull.GraphicsDevice,width,height);texture.SetData(output);return texture;
     }
-    public void Dispose(){_shield?.Dispose();_shield=null;_topologies.Clear();Clear();}
+    public void Dispose()
+    {
+        _shield?.Dispose();_shield=null;
+        foreach(var frame in _metallicFrames.Values)frame.Texture.Dispose();
+        _metallicFrames.Clear();_topologies.Clear();Clear();
+    }
 }
