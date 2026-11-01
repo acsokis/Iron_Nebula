@@ -8,6 +8,7 @@ A projekthez tartozó kiadástörténet 2026. október 28-i állapot szerint. A 
   damage and projectile scale while keeping projectile storage bounded.
 - Add alpha-matched metallic backing frames beneath textured player/enemy hulls;
   imported 3D models replace both sprite layers.
+- Add a root `RUN_GODOT_PREVIEW.bat` launcher for repeatable local testing.
 - Cover weapon patterns, pool limits, hull-frame alignment and model replacement
   in the Godot headless smoke test.
 

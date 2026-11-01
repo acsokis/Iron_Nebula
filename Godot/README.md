@@ -8,10 +8,13 @@ Requires Windows, Python, Git, Visual Studio C++ tools and a Windows SDK. From t
 
 ```powershell
 ./Godot/Build-Engine.ps1
-./.engine/godot-nvidia/bin/godot.windows.editor.x86_64.exe --path . --editor
-./.engine/godot-nvidia/bin/godot.windows.editor.x86_64.exe --path .
+./RUN_GODOT_PREVIEW.bat
+./RUN_GODOT_PREVIEW.bat --editor
 ```
 
+The root launcher starts the playable preview by default and forwards additional
+Godot command-line arguments. The engine is built once and kept under the ignored
+`.engine/` directory; run the build script if the launcher reports it missing.
 The helper checks out the official NVIDIA source at the immutable revision in [engine.json](./engine.json), installs pinned SCons into a project-local virtual environment, and builds the editor. It does not install or invoke any AI service. Engine sources, intermediate objects and executables stay ignored; no source ZIP or patch workflow is used. This minimal source build omits optional AccessKit and ANGLE dependencies; it does not establish accessibility readiness for a release.
 
 Use `--rendering-method gl_compatibility` on hardware without Forward+ support. The browser game remains the existing WebGL2 implementation; this preview does not export hardware RTX to the browser.
