@@ -1,0 +1,27 @@
+; Experimental engine branch. The existing native and Web builds remain supported.
+config_version=5
+
+[application]
+config/name="Iron Nebula — Godot engine preview"
+run/main_scene="res://Godot/arena.tscn"
+config/features=PackedStringArray("4.8", "Forward Plus")
+
+[display]
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[physics]
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="gl_compatibility"
+rendering_device/driver.windows="vulkan"
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[iron_nebula]
+rendering/request_rtx=true
+world/seed=87321

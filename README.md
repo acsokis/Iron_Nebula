@@ -1,5 +1,7 @@
 # IRON NEBULA
 
+**Experimental Godot NVIDIA engine branch:** see [build, controls and parity status](Godot/README.md). This is a separately validated 2.5D foundation with Jolt, procedural solid space objects, optional future 3D visual models, requested-by-default RTX and a baked VoxelGI raster fallback. It does not yet replace the complete native/browser campaign and co-op implementations.
+
 **Browser edition 0.9.14:** a roguelike bullet-hell space arcade adaptation with
 Endless Orbit, the native side-view ship/cockpit/effect/pickup artwork, scrolling
 parallax backgrounds and optional default-on tethered pointer flight. Touch drag
