@@ -26,8 +26,11 @@ for(const [key,name] of Object.entries(files)){
   const background=['frontier','rift','inferno','menu','cockpit','explosion','damageSmoke','uiAtlas'].includes(key);
   const pipeline=sharp(input);
   const original=await sharp(input).metadata();
-  const output=await pipeline.resize({width:background?1920:640,height:background?1080:640,fit:'inside',withoutEnlargement:true})
-    .webp({quality:background?87:92,lossless:key==='uiAtlas',alphaQuality:100,effort:6}).toBuffer();
+  // Preserve transparent hull edges and icon details: lossy RGB compression
+  // introduces dark/color fringes beside the otherwise lossless alpha channel.
+  const transparent=!!original.hasAlpha;
+  const output=await pipeline.resize({width:background?1920:1280,height:background?1080:1280,fit:'inside',withoutEnlargement:true})
+    .webp({quality:background?87:92,lossless:transparent||key==='uiAtlas',alphaQuality:100,effort:6}).toBuffer();
   const file=`${key}.webp`;await writeFile(resolve(destination,file),output);
   const metadata=await sharp(output).metadata();
   manifest.assets[key]={file,source:name,width:metadata.width,height:metadata.height,sourceWidth:original.width,sourceHeight:original.height,bytes:output.length,sha256:createHash('sha256').update(output).digest('hex')};

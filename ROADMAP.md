@@ -1,57 +1,39 @@
-# IRON NEBULA – Teljes roadmap
+# Iron Nebula — executive roadmap
 
-**Alapállapot: Alpha 0.9.11.2 (2026. október 28.)**
+Iron Nebula is a roguelike bullet-hell space arcade game. Releases represent complete player outcomes. Individual implementation steps belong in commits and issues.
 
-## Elkészült mérföldkövek
+## Current position
 
-| Állapot | Fő eredmény |
-|---|---|
-| 0.1–0.3 | Natív Windows prototípus, első szektor, harcrendszer |
-| 0.4–0.5 | HD sprite-ok, stabil roll/döntés, füst/robbanás és DOF |
-| 0.6 | Öt primary weapon, stackelhető 1–7 fejlesztés |
-| 0.7 | Rift szektor, HUD, kreditpickup és alapshop |
-| 0.8.1 | Rift bossok, Shop 2.0 |
-| 0.8.2.1 | Hangrendszer, felhasználói zene, F1 Help és hangerők |
-| 0.9.0–0.9.2 | Főmenü, új GUI, tartós mentés, billentyűk és kontroller |
-| 0.9.2.3–0.9.2.6 | Olvasható font, enemy HP, végleges Rift DOF |
-| 0.9.3–0.9.4 | Inferno Belt három szakasz, új ellenségek és bossok |
-| 0.9.5–0.9.7 | Economy 3.0, új HD bossok, stabilitás, három nehézség |
-| 0.9.9 | Combat/Audio polish, New Game difficulty választó |
-| 0.9.10–0.9.11.2 | Felbontások, MSAA, glow/hit effekt, egér GUI és direct mouse flight |
+| Area | Implemented foundation | Remaining evidence |
+|---|---|---|
+| Windows | Three sectors, bosses, five weapons, upgrades, shop, saves and controller input | Clean-machine and extended gameplay validation |
+| Browser | WebGL2 combat, native artwork/music, touch flight, endless orbit and GPU effects | Target-hardware measurements and current deployment verification |
+| Co-op | Browser 2–6-player P2P and phone controller; separate native networking | Multi-machine Internet/NAT coverage and sustained sessions |
+| Godot | Dedicated NVIDIA engine development branch | Playable migration, rendering/physics validation and feature parity |
 
-## Következő prioritások
+Implementation, automated validation, physical-device tests and live multiplayer evidence are separate states. An engine source checkout is not a completed migration.
 
-### Alpha 0.9.12 – Gameplay & Input Regression
-- A mouse/keyboard/controller fókuszváltás, fullscreen/ablakos mód, DPI és többmonitoros környezet alapos tesztelése.
-- 16:9 / 16:10 legördülő Resolution és MSAA független beállításának regressziós tesztje.
-- Bossok és szektorváltások több órás tesztje, mentés/Continue minden szektorhatáron.
-- Crash log és fejlesztői FPS panel finomhangolása; megmaradt kritikus hibák javítása.
+## Release milestones
 
-### Alpha 0.9.13 – Campaign Endgame
-- Teljes kampány lezáró képernyő a három szektor után.
-- Összesített score, kreditek, loot, rangok, lejátszott idő és bossstatisztika.
-- New Game+ vagy újrajátszhatósági megoldás, visszaállítható állapotokkal.
+| Milestone | Player outcome | Acceptance criteria |
+|---|---|---|
+| Alpha stabilization | Reliable desktop and browser play | Campaign/endless playthrough; saves and input regression; seamless layered backgrounds; reproducible deployment; no release-blocking defects |
+| Godot migration | Playable 2.5D game ready for 3D visual models | Complete combat loop and menus; original assets; validated physics; supported-hardware RTX and tested fallback; explicit parity report |
+| Connected co-op | Dependable 2–6-player online/LAN sessions | Multi-machine NAT tests; bounded network input; documented disconnect behavior; phone-controller and extended six-player tests |
+| 1.0 release candidate | Complete and supportable game | Clean installation; measured performance on target hardware; asset/license and security audits; documented known limitations |
 
-### Alpha 0.9.14 – Final Visual / Audio Polish
-- Végleges HD boss/ellenség sérülés- és robbanásvisszajelzések.
-- Pickup és projektil olvashatóság nagy felbontáson; kontrollált glow/blur.
-- Szektorváltási animációk és hangok, keverés/szintezés.
-- Fontok és UI hitboxok ellenőrzése 720p–4K és 16:10 esetén.
+Work can proceed in parallel. Dates and release numbers are assigned when scope and acceptance evidence are concrete. Advanced rendering and haptics depend on hardware; experimental Bluetooth HD haptics stays off by default.
 
-### Beta 1.0 – Release Candidate
-- Teljes Windows build és self-contained Release EXE, tiszta gépes teszttel.
-- Teljes végigjátszási teszt mindhárom szektoron, mindhárom nehézségen.
-- Mentésverziók, grafikus beállítások, kontroller és audio tesztek.
-- Teljesítménymérés (CPU/GPU/FPS), memóriaprofil, ütközési és lövedéklisták ellenőrzése.
-- Harmadik féltől származó font, zene és egyéb assetek licencellenőrzése.
+## Versioning policy
 
-## Opcionális további fejlesztések
+- Use `MAJOR.MINOR.PATCH`. Preserve published historical identifiers; do not renumber old releases.
+- A minor release delivers a cohesive feature set. The next feature release after 0.9.x is **0.10.0**, once its agreed scope passes acceptance.
+- A patch release is a published corrective release. Routine edits, visual tweaks, documentation and intermediate fixes do not automatically bump the product version.
+- Distributed development builds use a prerelease label and commit identity, for example `0.10.0-alpha.1+<commit>`. Increment the prerelease only for a new distributed test build.
+- Use `1.0.0-rc.1` for a release candidate and `1.0.0` for the accepted stable release.
+- Product release, network protocol and save schema have separate compatibility contracts. Change protocol/schema identifiers only when those contracts change.
+- Release notes describe shipped outcomes and breaking changes. Small implementation steps stay in Git history.
 
-- Sector 04: Frozen Expanse – jeges roncsmező, új bossok.
-- Sector 05: Machine Citadel – idegen gépbirodalom és kampánybővítés.
-- Achievementek, ranglista, szektorválasztás és statisztikák.
-- Lokális felhasználói profilok, accessibility funkciók, felbontás-/DPI-tesztek.
+## Delivery
 
-## Kiadási szabály
-
-A fejlesztés közvetlenül a verziózott forrásban történik. A kiadás commitból, ellenőrzött builddel és CI-folyamattal készül; köztes forráscsomagok és kézi kicsomagolási lépések nélkül.
+Edit the canonical repository directly and build through CI. Keep the working native/browser versions available while the Godot branch matures. Ship the engine migration with a parity report and known limitations. Do not use intermediate patch archives or duplicate source trees.

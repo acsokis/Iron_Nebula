@@ -3129,29 +3129,39 @@ private void DrawShop()
             float entryFade=MathHelper.Clamp(_riftFade,0f,1f);
             if(entryFade<.999f)
             {
-                const int oldWidth=2500, oldHeight=1407;
-                int oldX=-65-(int)Math.Min(420,_scroll*.027f);
-                _batch.Draw(_hdBackdrop,new Rectangle(oldX,(ViewHeight-oldHeight)/2,oldWidth,oldHeight),Color.White);
+                DrawEndlessBackdrop(_hdBackdrop,Color.White);
             }
             // One approved, deliberately quiet purple-green backdrop across Sector 02.
             // No bright plate swapping: important combat sprites remain distinguishable.
             // A tiny slow pan adds motion without visibly shifting the distant station.
-            int pan=(int)(MathF.Sin(_riftElapsed*.014f)*5f);
-            Rectangle destination=new(-10+pan,-6,ViewWidth+20,ViewHeight+12);
-            _batch.Draw(_riftCleanBackdrop,destination,Color.White*entryFade);
+            DrawEndlessBackdrop(_riftCleanBackdrop,Color.White*entryFade);
             // Only a very faint darkening during combat. Never hide the purple/green atmosphere.
             _ui.Rect(_batch,new Rectangle(0,0,ViewWidth,ViewHeight),new Color(0,3,10,6));
         }
         else
         {
-            const int pictureW=2500, pictureH=1407;
-            int x=-65-(int)Math.Min(420,_scroll*.027f);
-            int y=(ViewHeight-pictureH)/2;
-            _batch.Draw(_hdBackdrop,new Rectangle(x,y,pictureW,pictureH),Color.White);
+            DrawEndlessBackdrop(_hdBackdrop,Color.White);
             _ui.Rect(_batch,new Rectangle(0,0,ViewWidth,ViewHeight),new Color(0,7,20,65));
         }
         DrawParallaxRocks();
         if(_riftActive && _dofEnabled) DrawRiftDrifters(); // F6 shows/hides the entire DOF layer.
+    }
+
+    private void DrawEndlessBackdrop(Texture2D texture,Color tint)
+    {
+        // Adjacent tiles sample the same painted edge. Two-tile periods retain
+        // orientation across wrapping, using the same artwork as the web game.
+        float offset=(_travel*14f)%(ViewWidth*2f);
+        int index=(int)(offset/ViewWidth);
+        float shift=offset%ViewWidth;
+        int y=-50+(int)(MathF.Sin(_travel/95f)*22f);
+        for(int i=-1;i<=1;i++)
+        {
+            int left=(int)MathF.Round(i*ViewWidth-shift);
+            int right=(int)MathF.Round((i+1)*ViewWidth-shift);
+            var effects=((index+i)&1)!=0?SpriteEffects.FlipHorizontally:SpriteEffects.None;
+            _batch.Draw(texture,new Rectangle(left,y,right-left,ViewHeight+100),null,tint,0f,Vector2.Zero,effects,0f);
+        }
     }
 
     private void DrawRiftDrifters()

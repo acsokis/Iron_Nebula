@@ -136,6 +136,10 @@ continuous mirrored tiles with three independent parallax depths. Decorative
 asteroids now use sharp source art; far/mid/near drift at 35/140/340 world units
 per second. Texture-coordinate mirroring keeps enemy noses toward the player
 and makes the mirrored background edges meet correctly.
+The desktop background plates now use the same endless mirrored scrolling in
+all three sectors. Transparent browser sprites use lossless WebP at up to 1280
+pixels, preserving alpha and reducing compression fringes. Collectibles have
+consistent metal-rimmed badges, a steady 108-unit size and restrained glow.
 Tethered pointer flight is on by default and can be disabled in Settings.
 Finger dragging captures the touch pointer and follows continuously without
 page scrolling; physical iOS/Android validation remains separate from the

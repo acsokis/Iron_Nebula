@@ -14,7 +14,9 @@ test('a held confirm on controller connection cannot accidentally launch a run',
   await page.goto('/?test=1&render=off');await expect(page.locator('#loading')).toBeHidden({timeout:30000});
   await page.evaluate(()=>{window.testPad={id:'Xbox controller',index:0,connected:true,axes:[0,0,0,0],buttons:Array.from({length:17},(_,i)=>({pressed:i===0,value:i===0?1:0}))};});
   await expect(page.locator('body')).toHaveAttribute('data-profile','xbox');await page.waitForTimeout(150);await expect(page.locator('#menu')).toBeVisible();
-  const releasedAt=await page.evaluate(()=>{window.testPad.buttons[0]={pressed:false,value:0};return window.padPolls;});
-  await page.waitForFunction(count=>window.padPolls>count,releasedAt);
-  await page.evaluate(()=>{window.testPad.buttons[0]={pressed:true,value:1};});await expect(page.locator('#hud')).toBeVisible();
+  await page.evaluate(()=>{window.testPad.buttons[0]={pressed:false,value:0};});
+  await expect.poll(()=>page.evaluate(()=>window.__IRON_NEBULA__.control().padButtons[0])).toBe(false);
+  await page.evaluate(()=>{window.testPad.buttons[0]={pressed:true,value:1};});
+  await expect.poll(()=>page.evaluate(()=>window.__IRON_NEBULA__.state().phase)).toBe('playing');
+  await expect(page.locator('#hud')).toBeVisible();
 });

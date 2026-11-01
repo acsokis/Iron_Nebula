@@ -4,12 +4,12 @@
     "ship": {
       "file": "ship.webp",
       "source": "HD/player_sideview_refit.png",
-      "width": 640,
-      "height": 242,
+      "width": 1280,
+      "height": 483,
       "sourceWidth": 1364,
       "sourceHeight": 515,
-      "bytes": 72006,
-      "sha256": "65b9f86c67d2e5ead7ec884e604d25b5770a6f2a9f466f84348cd00447267af0"
+      "bytes": 523764,
+      "sha256": "c6e628c05e6646a439e18f005e8016f7ac600a9d6eaf4c2608abf88c2a585d05"
     },
     "plume": {
       "file": "plume.webp",
@@ -18,8 +18,8 @@
       "height": 219,
       "sourceWidth": 366,
       "sourceHeight": 219,
-      "bytes": 28048,
-      "sha256": "fa03cc181aeb24df06ec60acd0e56f92176996066429dd9c0643a53f42eb9949"
+      "bytes": 49820,
+      "sha256": "fd018a43b4a4f74914b170cb85d87d8c83e91c444474968596323bf4c9c55d2f"
     },
     "scout": {
       "file": "scout.webp",
@@ -28,8 +28,8 @@
       "height": 440,
       "sourceWidth": 500,
       "sourceHeight": 440,
-      "bytes": 31190,
-      "sha256": "c82f42ea6db6bfa36fcb07890d5e744a12a824555de193c580504db7a6010d66"
+      "bytes": 80660,
+      "sha256": "59ebc5224003042f0a46cb8ebe9f88b6e5443a43853532a0a24e37e873527cb9"
     },
     "interceptor": {
       "file": "interceptor.webp",
@@ -38,8 +38,8 @@
       "height": 440,
       "sourceWidth": 500,
       "sourceHeight": 440,
-      "bytes": 43886,
-      "sha256": "6bbde52ace09ee48fcf6539c896f2913e49777b9d90b86f906ab437f79afb8ad"
+      "bytes": 117432,
+      "sha256": "828479b4bc2c41f6fdc07e3e2b61d95440947de48d8b3d030043c201c93ec5d1"
     },
     "heavy": {
       "file": "heavy.webp",
@@ -48,8 +48,8 @@
       "height": 440,
       "sourceWidth": 500,
       "sourceHeight": 440,
-      "bytes": 50834,
-      "sha256": "7194acd9ed1d517b1479934b05308705e28bed8b16e5b25715b3aa7b069ef004"
+      "bytes": 136898,
+      "sha256": "c072433d2730607ac0e625da9c8ffa76c9ab040a7d660797b2f1b6ba61b42719"
     },
     "frontier": {
       "file": "frontier.webp",
@@ -84,42 +84,42 @@
     "riftGuardian": {
       "file": "riftGuardian.webp",
       "source": "Rift/rift_guardian_boss.png",
-      "width": 640,
-      "height": 579,
+      "width": 840,
+      "height": 760,
       "sourceWidth": 840,
       "sourceHeight": 760,
-      "bytes": 73466,
-      "sha256": "634686d9f663c34af868399b9900bb84dc5f747dfe9240fa15c75e7b04c86cd2"
+      "bytes": 294022,
+      "sha256": "4b8e7aaded49c99d6ba7e8288235225a56d411b5f9f15a0b9826ff7a72f1657e"
     },
     "riftBoss": {
       "file": "riftBoss.webp",
       "source": "Rift/rift_colossus_boss.png",
-      "width": 640,
-      "height": 578,
+      "width": 1040,
+      "height": 940,
       "sourceWidth": 1040,
       "sourceHeight": 940,
-      "bytes": 79882,
-      "sha256": "d2c313bd5f91c3b0134ce4763782dbfe9f3492f322c4e78172bfbfc04f43714c"
+      "bytes": 462864,
+      "sha256": "155847737167ba4261fa4d8db3bc92b18ec78c6e02f3d15302b315210c44d0b5"
     },
     "infernoGuardian": {
       "file": "infernoGuardian.webp",
       "source": "Inferno/inferno_guardian_boss.png",
-      "width": 640,
-      "height": 484,
+      "width": 820,
+      "height": 620,
       "sourceWidth": 820,
       "sourceHeight": 620,
-      "bytes": 77802,
-      "sha256": "4722733173a019bbf1834a26332ef3031beb12499cb15d6703a7d9f144a393a4"
+      "bytes": 320814,
+      "sha256": "98c3d10de42ead4afa6d14d9d5b46fa8fe1f9571b74faeb02e484ee1dd8f3f64"
     },
     "infernoBoss": {
       "file": "infernoBoss.webp",
       "source": "Inferno/inferno_titan_boss.png",
-      "width": 640,
-      "height": 538,
+      "width": 1000,
+      "height": 840,
       "sourceWidth": 1000,
       "sourceHeight": 840,
-      "bytes": 83780,
-      "sha256": "34331d5c4767e8f303a3459595ea6345e24d16dcd4615796ac72a58497a9f508"
+      "bytes": 481906,
+      "sha256": "9ad4cefea12413a5484c099e729d6e21932018b6dac665a464c315994f0cf783"
     },
     "dart": {
       "file": "dart.webp",
@@ -128,8 +128,8 @@
       "height": 320,
       "sourceWidth": 560,
       "sourceHeight": 320,
-      "bytes": 29658,
-      "sha256": "94dba5ebd7329602e5a3eedd160a3d6af4a6a53a14600e52515120c11dd60f76"
+      "bytes": 73960,
+      "sha256": "b002f205a4b86782ac75acfef7764a964fef93642fda583103421ffa82878d6f"
     },
     "wisp": {
       "file": "wisp.webp",
@@ -138,8 +138,8 @@
       "height": 320,
       "sourceWidth": 560,
       "sourceHeight": 320,
-      "bytes": 33176,
-      "sha256": "2d4c653eb1a2ca92d3e6bb91713403f3d65dcee33caf891aef6818895988fbf5"
+      "bytes": 82448,
+      "sha256": "c47bcd2e31441ce32bc0e509ff13f5ec5cddf9add7ab5f9e09501a38716cd08c"
     },
     "infernoEnemy": {
       "file": "infernoEnemy.webp",
@@ -148,8 +148,8 @@
       "height": 260,
       "sourceWidth": 400,
       "sourceHeight": 260,
-      "bytes": 25152,
-      "sha256": "6c058825b58c1322993aab6e1b51fd97cef21213173cbb6b6a46df3509f7a45a"
+      "bytes": 59432,
+      "sha256": "8915daee9e4b75e121b65efb658f4bbbd1949ababc72ff60dee2549710518401"
     },
     "pulse": {
       "file": "pulse.webp",
@@ -158,8 +158,8 @@
       "height": 100,
       "sourceWidth": 224,
       "sourceHeight": 100,
-      "bytes": 3380,
-      "sha256": "4df267ff4a3a30441e2a9668b6659e33162a1b49d3157d7d9cb840ce13f113c6"
+      "bytes": 6326,
+      "sha256": "d57691c6c10bb5bc73d379e68865c081c5b2dc35ccaad14a1238708902d61ca7"
     },
     "lance": {
       "file": "lance.webp",
@@ -168,8 +168,8 @@
       "height": 84,
       "sourceWidth": 270,
       "sourceHeight": 84,
-      "bytes": 4078,
-      "sha256": "ceaae1e82eba6670ca7a0d13146917c8b2b59a16f6b56891c8d3992743e9df2b"
+      "bytes": 5608,
+      "sha256": "88d2b620593af74bfc14c1276c7d4da8e5c571713be4597dc3d4505d5cf9bb50"
     },
     "arc": {
       "file": "arc.webp",
@@ -178,8 +178,8 @@
       "height": 148,
       "sourceWidth": 220,
       "sourceHeight": 148,
-      "bytes": 7502,
-      "sha256": "acb8112eebf8d932b63c030536ed172ee2f8c2a3ff2cc33acb0a940fb0036e9f"
+      "bytes": 14662,
+      "sha256": "e294b520fffa74d9320c0fbb3f461a73881d8e335e4fa8cfbedeebfdc527a984"
     },
     "gatling": {
       "file": "gatling.webp",
@@ -188,28 +188,28 @@
       "height": 52,
       "sourceWidth": 128,
       "sourceHeight": 52,
-      "bytes": 1870,
-      "sha256": "996307dd656ee8af0d3381ce4ae75a0ea1a96b8bedf5fb46bd604f9e582aebf9"
+      "bytes": 3108,
+      "sha256": "db4c14850eb27d116d769e8e83801297d0bc5b47f892fc9b4535c4f3b43b9bd8"
     },
     "warden": {
       "file": "warden.webp",
       "source": "mini_warden.png",
-      "width": 640,
-      "height": 455,
+      "width": 760,
+      "height": 540,
       "sourceWidth": 760,
       "sourceHeight": 540,
-      "bytes": 63874,
-      "sha256": "f5860217e91f16d24e1b074edb23e9ccf92b83c052a36d880a819988c133a24a"
+      "bytes": 232908,
+      "sha256": "079361b3534049496913964b8706332bd3236283914b27302a69cc0d2ec922dd"
     },
     "sentinel": {
       "file": "sentinel.webp",
       "source": "boss_sentinel.png",
-      "width": 640,
-      "height": 562,
+      "width": 740,
+      "height": 650,
       "sourceWidth": 740,
       "sourceHeight": 650,
-      "bytes": 76744,
-      "sha256": "e145283b162a02a446a026ab460b1ff6980005736f23a1baffd9c06513bfb2fc"
+      "bytes": 238936,
+      "sha256": "a83d9b476f6f01ed02e37c48a491c3b33469465e0034b88254e6b88a11737e12"
     },
     "rock": {
       "file": "rock.webp",
@@ -218,8 +218,8 @@
       "height": 298,
       "sourceWidth": 298,
       "sourceHeight": 298,
-      "bytes": 37548,
-      "sha256": "787bd0cbbfcc94206de4177bfe0e911536c250bf854cd379dafe6310d06bfaf3"
+      "bytes": 96170,
+      "sha256": "bf20327bbd1d0b991c632ef6772b9ca4e342de90551e594a48a77c4dc01a4fff"
     },
     "rock2": {
       "file": "rock2.webp",
@@ -228,8 +228,8 @@
       "height": 512,
       "sourceWidth": 512,
       "sourceHeight": 512,
-      "bytes": 105852,
-      "sha256": "2ff37c8f8a62e1722b4996b2e53dc276e369f25688e8741ded8850b1cab62f55"
+      "bytes": 278876,
+      "sha256": "7f143e29234b54e39daffca9482c46941548a64dc2569c8817d04fb8f40a2c6b"
     },
     "drone": {
       "file": "drone.webp",
@@ -238,8 +238,8 @@
       "height": 280,
       "sourceWidth": 440,
       "sourceHeight": 280,
-      "bytes": 21344,
-      "sha256": "97bdf8e26aa92f697ace97dc8602002c4619faf68f007030506f21c2ce8bd880"
+      "bytes": 33496,
+      "sha256": "4c198a9ab803cb19e91d51b0c2fdc3ee7a1438ec2b0012ab2e750f8e4e57ffa5"
     },
     "shield": {
       "file": "shield.webp",
@@ -248,8 +248,8 @@
       "height": 512,
       "sourceWidth": 512,
       "sourceHeight": 512,
-      "bytes": 52860,
-      "sha256": "17adc2c5c4bb52beb450c01e0859ebe2d5577cfacec178e81d133b50a9d37522"
+      "bytes": 30442,
+      "sha256": "ef4a65099ee367ac27e3d1de7571cd2f60a8d14359fc54a00bff784745a4d725"
     },
     "shieldShell": {
       "file": "shieldShell.webp",
@@ -258,8 +258,8 @@
       "height": 256,
       "sourceWidth": 256,
       "sourceHeight": 256,
-      "bytes": 15894,
-      "sha256": "15a2376d3ac3d06a77c9a22b00b8300d54edda19299b9ed82cc958eb7af9ca4e"
+      "bytes": 26432,
+      "sha256": "d79facd634f790a9775a56b7082f67d50996ef26679731abe207312f2fee04e4"
     },
     "cockpit": {
       "file": "cockpit.webp",
@@ -268,8 +268,8 @@
       "height": 132,
       "sourceWidth": 1920,
       "sourceHeight": 132,
-      "bytes": 80458,
-      "sha256": "b35c2aa2087213d251ec47ec754976b3bc841214b5c80d29c1df7b1368145cb3"
+      "bytes": 274772,
+      "sha256": "306a3cde7a54ca0f66effbf83428bb0e5cd00b94bf1c45c004e82ebe9ebead06"
     },
     "menu": {
       "file": "menu.webp",
@@ -298,8 +298,8 @@
       "height": 128,
       "sourceWidth": 128,
       "sourceHeight": 128,
-      "bytes": 10454,
-      "sha256": "ab4e1519ba0171017b28d9863d165d2c502bbf6f5827089e8623c24e799052c7"
+      "bytes": 19784,
+      "sha256": "a073661cd210f54bb8f64b32df9f8ea85cc449e18b7c25c2b5838089dd5aaaef"
     },
     "pickupWeapon": {
       "file": "pickupWeapon.webp",
@@ -308,8 +308,8 @@
       "height": 128,
       "sourceWidth": 128,
       "sourceHeight": 128,
-      "bytes": 4740,
-      "sha256": "4bda79028e750bb5efbaf53c75a75d9a9edab91f174e30d01f822af875908a0f"
+      "bytes": 7010,
+      "sha256": "12e45b6593ba2ee30f5956cd57545f7d69a8f2af3d1344929dda3bb1fcf1a89a"
     },
     "pickupShield": {
       "file": "pickupShield.webp",
@@ -318,8 +318,8 @@
       "height": 128,
       "sourceWidth": 128,
       "sourceHeight": 128,
-      "bytes": 5050,
-      "sha256": "9a0d2312e4ba5f7fa793068d7452e8177d49938b8dd8f0f16ba396321a077526"
+      "bytes": 7980,
+      "sha256": "d053dbd4dd7157e2b98105c2ad53bb97ac2f8e808e7eb95957bbbd089b626d4e"
     },
     "pickupRepair": {
       "file": "pickupRepair.webp",
@@ -328,8 +328,8 @@
       "height": 128,
       "sourceWidth": 128,
       "sourceHeight": 128,
-      "bytes": 4514,
-      "sha256": "34b1c25c544efdae13360a283cb9b98fba94f9acb13dc3fcf569e4556c636abf"
+      "bytes": 8180,
+      "sha256": "a5f3b5014928c3a0179aef8223e70efb6626be6223bb2a3869babf3a46fa4025"
     },
     "pickupDrone": {
       "file": "pickupDrone.webp",
@@ -338,8 +338,8 @@
       "height": 128,
       "sourceWidth": 128,
       "sourceHeight": 128,
-      "bytes": 3468,
-      "sha256": "6a2fedb620b754b923a4ac178427456786ba3ceb6b7ee7181246a1731fe0cb30"
+      "bytes": 5692,
+      "sha256": "8fb975c9c50fcc568d7a6bd84fe8f7b3d30d8ea693e3f5b8fbdb318805e92201"
     },
     "explosion": {
       "file": "explosion.webp",
@@ -348,8 +348,8 @@
       "height": 960,
       "sourceWidth": 2048,
       "sourceHeight": 1024,
-      "bytes": 447262,
-      "sha256": "f4011486e3078657f1d7b8a0953dd320c003a96455f96354be12487f82cf90a9"
+      "bytes": 1257686,
+      "sha256": "104023bd34e17cf7e3a2268d2cf15028f126c184b13ed1fd3146f82ccbe8a1c6"
     },
     "damageSmoke": {
       "file": "damageSmoke.webp",
@@ -358,8 +358,8 @@
       "height": 1080,
       "sourceWidth": 1344,
       "sourceHeight": 1280,
-      "bytes": 244594,
-      "sha256": "721c4f3efda93182856998cea9013235aa9b6c43e7b5730a8eeafb9c5050b766"
+      "bytes": 678588,
+      "sha256": "599d68880214bc21c7eb839d513715e12a06f272e5234c94a122634328d53a45"
     },
     "beamStrip": {
       "file": "beamStrip.webp",
@@ -368,8 +368,8 @@
       "height": 64,
       "sourceWidth": 192,
       "sourceHeight": 64,
-      "bytes": 3412,
-      "sha256": "77ecc6c19153651464aee066b9eeec53d5cbe62360c48499264489f40f95bef9"
+      "bytes": 4776,
+      "sha256": "0d89088870f29d0311aa0c50d7e15ed2155661e8c7587122620a10aebd88ead5"
     },
     "beamMuzzle": {
       "file": "beamMuzzle.webp",
@@ -378,8 +378,8 @@
       "height": 64,
       "sourceWidth": 112,
       "sourceHeight": 64,
-      "bytes": 2692,
-      "sha256": "6b649af45cd29b4498eb83b90ae84550d35ab3208d531589a17ccb8a46d6f29f"
+      "bytes": 4362,
+      "sha256": "892804fab31ad9ce163fc48a8e6ddaab32b97cc598b101daa36607763b8e3c11"
     },
     "impactPulse": {
       "file": "impactPulse.webp",
@@ -388,8 +388,8 @@
       "height": 126,
       "sourceWidth": 156,
       "sourceHeight": 126,
-      "bytes": 3736,
-      "sha256": "238c417ff473bfcfd333237c53a963ba4fc706db4c87336ed6eb4afda92ed317"
+      "bytes": 2336,
+      "sha256": "4eb3b8c8743efd75948623a06da6bc7bbf7b32b92d562471e8ca6b032b176d48"
     },
     "impactLance": {
       "file": "impactLance.webp",
@@ -398,8 +398,8 @@
       "height": 106,
       "sourceWidth": 194,
       "sourceHeight": 106,
-      "bytes": 4710,
-      "sha256": "f38b61a361c4ffe9cb79bc98f67d7c9516e793aae87949d6ee3f08d355cc9e2e"
+      "bytes": 7730,
+      "sha256": "cd0a7cfed5cb29c25a0aea1586e19ad552d653801e25ba05b32c9250f63dbcc0"
     },
     "impactArc": {
       "file": "impactArc.webp",
@@ -408,8 +408,8 @@
       "height": 154,
       "sourceWidth": 180,
       "sourceHeight": 154,
-      "bytes": 7336,
-      "sha256": "e792d553843d54eeb93a3304ddda4456c35a8367280eb6c17c686d21a81a5127"
+      "bytes": 9884,
+      "sha256": "853ac7fa34a2d274d2d8804be1bc83219ec6b79da53cfa3dc08070058f504934"
     },
     "impactGatling": {
       "file": "impactGatling.webp",
@@ -418,8 +418,8 @@
       "height": 112,
       "sourceWidth": 176,
       "sourceHeight": 112,
-      "bytes": 8086,
-      "sha256": "d9538f8a749eff3b084add4b5595512c84dd744f0e3de4a2ba8ebd3e87ef7344"
+      "bytes": 16026,
+      "sha256": "410b70347eb36d58ce9c38cbb28e8be9b324055023f470cc45a41605ebbd7bcd"
     },
     "impactBeam": {
       "file": "impactBeam.webp",
@@ -428,38 +428,38 @@
       "height": 112,
       "sourceWidth": 176,
       "sourceHeight": 112,
-      "bytes": 6516,
-      "sha256": "0029faf5334080c055e69f0ef6411e11049e4cd5c7003bcf78a07b13a3264cba"
+      "bytes": 13512,
+      "sha256": "a34e510409a0a754f1909bd0fa5644f9672b6118f721b4db5896cbdcba29d32c"
     },
     "hull1": {
       "file": "hull1.webp",
       "source": "HD/hull_damage_1.png",
-      "width": 640,
-      "height": 242,
+      "width": 1280,
+      "height": 483,
       "sourceWidth": 1364,
       "sourceHeight": 515,
-      "bytes": 3762,
-      "sha256": "9e9392c332ab12772634d6e2b1bea86fa7b865cd352b7603d13e201466591e34"
+      "bytes": 18538,
+      "sha256": "3058c6a113c3da412c42853dd83f25b3556ae2170b0fb398d49588b59b98c268"
     },
     "hull2": {
       "file": "hull2.webp",
       "source": "HD/hull_damage_2.png",
-      "width": 640,
-      "height": 242,
+      "width": 1280,
+      "height": 483,
       "sourceWidth": 1364,
       "sourceHeight": 515,
-      "bytes": 10166,
-      "sha256": "c9e4b0cd16ba8b7f41c3e2a0cc8189ebafc459e50fbb31ee5237ef060951d021"
+      "bytes": 53004,
+      "sha256": "8bf1ad26522b6a01ecf59efa26e36e070e0dbc5380f6961ca5ef186f441484e5"
     },
     "hull3": {
       "file": "hull3.webp",
       "source": "HD/hull_damage_3.png",
-      "width": 640,
-      "height": 242,
+      "width": 1280,
+      "height": 483,
       "sourceWidth": 1364,
       "sourceHeight": 515,
-      "bytes": 12494,
-      "sha256": "f3c0c5e868df9a32772bfc39f5d9a5b244aab3fc475e3cc681104c3c03e76f26"
+      "bytes": 66922,
+      "sha256": "aba42a9a5fe076e17ad139eb0a676a782f2af10e662e878c81ba5a73876a2287"
     },
     "dofFar": {
       "file": "dofFar.webp",
@@ -468,8 +468,8 @@
       "height": 256,
       "sourceWidth": 256,
       "sourceHeight": 256,
-      "bytes": 6316,
-      "sha256": "5873698ab858af6747bc174a48d6bf47ee556b088cb68ebcea8325f73735624b"
+      "bytes": 30712,
+      "sha256": "376c72ef19021a93aabb69860ca1c014cb610c617f7121e11453b3d868a05d4b"
     },
     "dofMid": {
       "file": "dofMid.webp",
@@ -478,8 +478,8 @@
       "height": 256,
       "sourceWidth": 256,
       "sourceHeight": 256,
-      "bytes": 7868,
-      "sha256": "cfd4c6b21e3b8fc2c74977b19a31fe415a938715c22835677feed818edc2f9e2"
+      "bytes": 33130,
+      "sha256": "a2e7a436dcdda4b6cc8b6bd6dffc810798b027518df0fee3b14e704a8b88898d"
     },
     "dofNear": {
       "file": "dofNear.webp",
@@ -488,8 +488,8 @@
       "height": 256,
       "sourceWidth": 256,
       "sourceHeight": 256,
-      "bytes": 9102,
-      "sha256": "fa658d526ff855c6227c86158a70307966dadecfc8fd753fcc227687ab3b86fa"
+      "bytes": 33586,
+      "sha256": "e77168497ca8c102a9e1a804e4905b311ea3e1b260ed867cdf4fc89ba15a6ced"
     }
   }
 }

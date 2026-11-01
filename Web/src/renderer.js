@@ -46,7 +46,7 @@ export class Renderer{
     this.gpuSprites=new GpuSprites(this.scene);
     this.postScene=new THREE.Scene();this.postCamera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
     this.quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));this.postScene.add(this.quad);
-    this.pool=new Map();this.textures={};this.frame=0;this.frames=new Map();this.mirrors=new Map();
+    this.pool=new Map();this.textures={};this.frame=0;this.frames=new Map();this.mirrors=new Map();this.pickupBadges=new Map();
     this.settings={lighting:true,gi:true,shadows:false,bloom:.65,fog:.28,ambient:.56,quality:.75,hdr:true,fxBudget:48,profile:'balanced'};
     const target=(w,h)=>new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:false});
     // Half-float targets preserve emissive energy before bloom and radiance diffusion.
@@ -65,9 +65,27 @@ export class Renderer{
   async load(onProgress=()=>{}){
     const entries=Object.entries(this.manifest.assets),loader=new THREE.TextureLoader();let done=0;
     await Promise.all(entries.map(async([key,asset])=>{const texture=await loader.loadAsync(new URL(`./assets/${asset.file}`,document.baseURI).href);
-      texture.colorSpace=THREE.SRGBColorSpace;this.textures[key]=texture;onProgress(++done/entries.length);}));
+      texture.colorSpace=THREE.SRGBColorSpace;
+      // Transparent art must not average opaque black padding into mip levels.
+      // Linear sampling retains the source alpha edge at the small gameplay scale.
+      if(!['frontier','rift','inferno','menu'].includes(key)){texture.generateMipmaps=false;texture.minFilter=THREE.LinearFilter;}
+      this.textures[key]=texture;onProgress(++done/entries.length);}));
   }
   makeGlow(){const canvas=document.createElement('canvas');canvas.width=canvas.height=64;const ctx=canvas.getContext('2d'),g=ctx.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'white');g.addColorStop(.18,'rgba(255,255,255,.8)');g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);return new THREE.CanvasTexture(canvas);}
+  pickupBadge(art,color){
+    if(this.pickupBadges.has(art))return this.pickupBadges.get(art);
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const c=canvas.getContext('2d');
+    const plate=c.createLinearGradient(0,22,0,234);plate.addColorStop(0,'#294554');plate.addColorStop(.45,'#071522');plate.addColorStop(1,'#142736');
+    c.beginPath();c.arc(128,128,111,0,Math.PI*2);c.fillStyle=plate;c.fill();
+    const rim=c.createLinearGradient(30,20,210,240);rim.addColorStop(0,'#e2f6ff');rim.addColorStop(.35,'#426379');rim.addColorStop(.7,'#1a2b38');rim.addColorStop(1,'#8ba9b8');
+    c.strokeStyle=rim;c.lineWidth=5;c.stroke();
+    c.beginPath();c.arc(128,128,99,0,Math.PI*2);c.strokeStyle=color;c.lineWidth=2;c.globalAlpha=.65;c.stroke();c.globalAlpha=1;
+    for(let i=0;i<4;i++){const a=i*Math.PI/2;c.beginPath();c.arc(128,128,105,a-.15,a+.15);c.strokeStyle=color;c.lineWidth=6;c.stroke();}
+    // Retain the original collectible glyph, framed consistently across types.
+    c.drawImage(this.textures[art].image,52,52,152,152);
+    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+    texture.generateMipmaps=false;texture.minFilter=THREE.LinearFilter;this.pickupBadges.set(art,texture);return texture;
+  }
   makeSmoke(){const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const ctx=canvas.getContext('2d'),image=ctx.createImageData(128,128);
     for(let y=0;y<128;y++)for(let x=0;x<128;x++){const n=.55+.2*Math.sin(x*.19+y*.13)+.15*Math.sin(x*.41-y*.21),r=Math.hypot(x-64,y-64)/64,index=(y*128+x)*4;
       image.data[index]=image.data[index+1]=image.data[index+2]=135+n*75;image.data[index+3]=Math.max(0,1-r*r)*n*180;}
@@ -140,7 +158,9 @@ export class Renderer{
       else{const width=Math.max(.75,Math.min(1.55,s.radius/10));for(const [length,height,color,opacity]of [[43,width*10,'#030917',.8],[43,width*5.3,s.color,.93],[21,width*1.9,'#ffffff',.95]])this.gpuSprites.add('enemyShots',this.white,{x:s.x,y:s.y,width:length,height,rotation,color,opacity},1800);}}
     for(const p of w.pickups){const color={credits:'#ffd483',weapon:'#91f1ff',shield:'#71baff',repair:'#a0ffa9',drone:'#ceaeff'}[p.type];
       const art={credits:'pickupCredits',weapon:'pickupWeapon',shield:'pickupShield',repair:'pickupRepair',drone:'pickupDrone'}[p.type];
-      this.sprite(`pickupGlow${p.id}`,this.glow,p.x,p.y,112,112,color,0,4,.3);this.object(`pickup${p.id}`,art,p.x,p.y+Math.sin(w.time*3+p.id)*4,94*(1+.08*Math.sin(w.time*6.4+p.id)),'#ffffff',0,5);}
+      const y=p.y+Math.sin(w.time*3+p.id)*3;
+      this.sprite(`pickupGlow${p.id}`,this.glow,p.x,y,132,132,color,0,4,.14);
+      this.sprite(`pickup${p.id}`,this.pickupBadge(art,color),p.x,y,108,108,'#ffffff',0,5);}
     for(const f of w.fx.slice(-this.settings.fxBudget)){const t=1-f.age/f.life;if(f.type==='explosion'){
         const frame=Math.min(7,Math.floor(f.age/.075));if(f.age<.6)this.sprite(`fx${f.id}`,this.frameTexture('explosion',frame,4,2),f.x,f.y,f.size*2,f.size*2,'#fff0e4',f.id*.7,6,Math.min(1,(1-f.age/.6)*3));
         this.gpuSprites.add('smoke',this.textures.damageSmoke,{x:f.x,y:f.y,width:f.size,height:f.size,rotation:f.id*.7+f.age*.12,opacity:t*.55,frame:(f.id%3)+Math.min(3,Math.floor(f.age*3))*3,columns:3,rows:4,smokeAge:f.age,z:5},100);
@@ -167,7 +187,7 @@ export class Renderer{
     else this.pass(this.finalMaterial,null);
     if(this.frame%120===0)for(const [key,e]of this.pool)if(this.frame-e.last>120){this.scene.remove(e.sprite);e.sprite.material.dispose();this.pool.delete(key);}
   }
-  diagnostics(){return {webgl:this.context.getParameter(this.context.VERSION),gpuFx:this.gpuSprites.diagnostics(),sceneDrawCalls:this.sceneDrawCalls,profile:this.settings.profile,fxBudget:this.settings.fxBudget,orbit:this.orbitView,pickupSize:94,hdrAvailable:this.hdr,hdrLighting:this.settings.hdr,hdrDisplay:this.presenter.enabled,
+  diagnostics(){return {webgl:this.context.getParameter(this.context.VERSION),gpuFx:this.gpuSprites.diagnostics(),sceneDrawCalls:this.sceneDrawCalls,profile:this.settings.profile,fxBudget:this.settings.fxBudget,orbit:this.orbitView,pickupSize:108,hdrAvailable:this.hdr,hdrLighting:this.settings.hdr,hdrDisplay:this.presenter.enabled,
     hdrDisplayAvailable:!!navigator.gpu&&this.presenter.display.matches,gi:'2D screen-space radiance diffusion',giEnabled:this.settings.gi,lightingEnabled:this.settings.lighting,
     drawCalls:this.renderer.info.render.calls,textures:this.renderer.info.memory.textures};}
 }
