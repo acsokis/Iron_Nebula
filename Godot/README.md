@@ -31,7 +31,7 @@ Headless checks validate scene/script/physics behavior; they do not validate GPU
 - A replaceable `VisualSlot` child on each body. Set the arena's `ship_model` to an imported GLB/glTF scene; flight, collision and muzzle nodes remain independent of the visual model.
 - Shared original textures loaded directly from `Web/public/assets`. Three generated space plates scroll without mirroring. Browser/native use an edge overlap; Godot uses opaque emission-mapped periodic planes compatible with the path tracer. Scenery, physical wrecks, asteroids and a modular station occupy separate depth layers.
 - A separately seeded, bounded procedural physical field with zero-gravity Jolt rigid bodies, CCD, full-volume spawn checks and destructible near-field asteroids/wrecks. Capsule-based flight navigation checks complete swept corridors and waits when blocked; players exclude one another from collision masks.
-- WASD/left-stick flight, mouse/RT fire, default tethered mouse following, bounded GPU-instanced projectiles, enemy spawning and hit scoring. `T` toggles tethering, `Tab` previews the next sector, `Esc` exits.
+- WASD/left-stick flight, mouse/RT fire, five selectable primary weapons (`1`-`5`) with distinct cadence, damage, spread and projectile scale, default tethered mouse following, bounded GPU-instanced projectiles, enemy spawning and hit scoring. `T` toggles tethering, `Tab` previews the next sector, `Esc` exits.
 - A requested-by-default NVIDIA path-tracing setting that activates only if the fork exposes the property and Vulkan reports ray-tracing pipeline support. The HUD reports the selected path. Raster mode is the fallback.
 
 ## Rendering and parity boundaries
@@ -44,4 +44,4 @@ Local validation: source-built NVIDIA engine, headless movement/collision/model 
 
 `-- --raster-preview` selects the VoxelGI fallback for comparison. Both modes were viewport-captured locally; the path-traced preview uses emission-mapped cutout sprite art and opaque emission background planes. The experimental fork still prints `OpTypeForwardPointer is not supported yet`; full material/denoiser parity remains outside this preview's acceptance evidence.
 
-Campaign progression, bosses, five-weapon parity, shop/upgrades/saves, native-style menus, audio, touch/phone input, advanced haptics and network co-op are **not ported to this preview yet**. Use the existing native/browser builds for those features. See the [executive roadmap](../ROADMAP.md) for migration acceptance criteria.
+Campaign progression, bosses, full weapon progression and balance parity, shop/upgrades/saves, native-style menus, audio, touch/phone input, advanced haptics and network co-op are **not ported to this preview yet**. Use the existing native/browser builds for those features. See the [executive roadmap](../ROADMAP.md) for migration acceptance criteria.

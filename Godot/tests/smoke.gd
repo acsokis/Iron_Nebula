@@ -27,6 +27,32 @@ func run_checks() -> void:
 	await process_frame
 	check(arena.pilot is CharacterBody3D, "Flight uses a real 3D physics body")
 	check(arena.pilot.has_node("VisualSlot"), "Visual model stays separate from collision")
+	check(arena.WEAPONS.size() == 5, "All five primary weapon modes are available")
+	for mode in range(arena.WEAPONS.size()):
+		arena.select_weapon(mode)
+		var before_shots: int = arena.shots.size()
+		arena.fire_volley()
+		var expected_shots: int = arena.WEAPONS[mode]["angles"].size()
+		check(arena.shots.size() - before_shots == expected_shots, "%s fires its expected volley pattern" % arena.WEAPONS[mode]["name"])
+		if expected_shots > 0:
+			check(arena.shots[before_shots]["damage"] == arena.WEAPONS[mode]["damage"], "%s applies its configured damage" % arena.WEAPONS[mode]["name"])
+		arena.shots.clear()
+		arena.fire_clock = 0
+	arena.shots.resize(arena.SHOT_LIMIT - 1)
+	arena.select_weapon(2)
+	arena.fire_volley()
+	check(arena.shots.size() == arena.SHOT_LIMIT, "Spread volleys respect the bounded projectile pool")
+	arena.shots.clear()
+	var select_beam := InputEventKey.new()
+	select_beam.physical_keycode = KEY_5
+	select_beam.pressed = true
+	arena._unhandled_key_input(select_beam)
+	check(arena.weapon_mode == 4, "Number keys select the matching weapon")
+	var select_pulse := InputEventKey.new()
+	select_pulse.physical_keycode = KEY_1
+	select_pulse.pressed = true
+	arena._unhandled_key_input(select_pulse)
+	check(arena.weapon_mode == 0, "Pulse remains the default weapon")
 	var before: float = arena.pilot.position.x
 	key(KEY_D, true)
 	for i in range(45):

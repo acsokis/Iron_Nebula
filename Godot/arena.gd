@@ -8,6 +8,13 @@ const ProceduralSpace = preload("res://Godot/procedural_space.gd")
 const BACKDROPS = ["spaceFrontier", "spaceRift", "spaceInferno"]
 const FIELD = Vector2(48, 27)
 const SHOT_LIMIT = 512
+const WEAPONS := [
+	{"name": "PULSE", "interval": 0.10, "speed": 38.0, "damage": 1, "angles": [0.0], "scale": Vector3.ONE},
+	{"name": "LANCE", "interval": 0.32, "speed": 52.0, "damage": 2, "angles": [0.0], "scale": Vector3(1.8, 0.75, 0.75)},
+	{"name": "ARC", "interval": 0.24, "speed": 34.0, "damage": 1, "angles": [-0.14, 0.0, 0.14], "scale": Vector3(0.8, 0.8, 0.8)},
+	{"name": "GATLING", "interval": 0.055, "speed": 43.0, "damage": 1, "angles": [0.0], "scale": Vector3(0.65, 0.65, 0.65)},
+	{"name": "BEAM", "interval": 0.14, "speed": 56.0, "damage": 3, "angles": [0.0], "scale": Vector3(2.4, 0.55, 0.55)},
+]
 var camera: Camera3D
 var pilot: CharacterBody3D
 var muzzle: Marker3D
@@ -21,6 +28,7 @@ var projectile_mesh: MultiMeshInstance3D
 var elapsed := 0.0
 var fire_clock := 0.0
 var spawn_clock := 0.0
+var weapon_mode := 0
 var sector := 0
 var score := 0
 var tethered := true
@@ -173,6 +181,23 @@ func make_boundary(center: Vector3, size: Vector3, layer: int) -> void:
 	wall.add_child(collision)
 	add_child(wall)
 
+func select_weapon(value: int) -> void:
+	weapon_mode = posmod(value, WEAPONS.size())
+
+func fire_volley() -> void:
+	var weapon: Dictionary = WEAPONS[weapon_mode]
+	for angle: float in weapon["angles"]:
+		if shots.size() >= SHOT_LIMIT:
+			break
+		var direction := Vector3(cos(angle), sin(angle), 0)
+		shots.append({
+			"position": muzzle.global_position,
+			"velocity": direction * float(weapon["speed"]),
+			"damage": int(weapon["damage"]),
+			"scale": weapon["scale"],
+		})
+	fire_clock = float(weapon["interval"])
+
 func spawn_is_clear(center: Vector3, dimensions: Vector2) -> bool:
 	var query := PhysicsShapeQueryParameters3D.new()
 	var shape := CapsuleShape3D.new()
@@ -200,7 +225,9 @@ func set_sector(value: int) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.physical_keycode == KEY_TAB:
+		if event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_5:
+			select_weapon(event.physical_keycode - KEY_1)
+		elif event.physical_keycode == KEY_TAB:
 			set_sector(sector + 1)
 		elif event.physical_keycode == KEY_T:
 			tethered = not tethered
@@ -230,13 +257,13 @@ func _physics_process(delta: float) -> void:
 	pilot.move_and_slide()
 	fire_clock -= delta
 	if firing and fire_clock <= 0 and shots.size() < SHOT_LIMIT:
-		shots.append({"position": muzzle.global_position, "velocity": Vector3(38, 0, 0)})
-		fire_clock = 0.1
+		fire_volley()
 	spawn_clock -= delta
 	if spawn_clock <= 0 and enemies.size() < 24:
 		var candidate := Vector3(27, sin(elapsed * 1.7) * 9, 0)
 		if spawn_is_clear(candidate, Vector2(3.5, 1.6)):
 			var enemy := make_body("scout", Vector2(3.5, 1.6), null, true)
+			enemy.set_meta("health", 2)
 			enemy.position = candidate
 			enemies.append(enemy)
 			spawn_clock = 1.1
@@ -256,21 +283,26 @@ func _physics_process(delta: float) -> void:
 		var hit := get_world_3d().direct_space_state.intersect_ray(ray)
 		if not hit.is_empty():
 			if hit.collider is RigidBody3D and hit.collider.has_meta("health"):
-				var health: int = int(hit.collider.get_meta("health")) - 1
+				var health: int = int(hit.collider.get_meta("health")) - int(shot["damage"])
 				hit.collider.set_meta("health", health)
 				if health <= 0:
 					hit.collider.queue_free()
 					score += 25
 			if hit.collider is CharacterBody3D and hit.collider in enemies and not hit.collider.is_queued_for_deletion():
-				navigation.forget(hit.collider)
-				hit.collider.queue_free()
-				score += 100
+				var health: int = int(hit.collider.get_meta("health")) - int(shot["damage"])
+				if health <= 0:
+					navigation.forget(hit.collider)
+					hit.collider.queue_free()
+					score += 100
+				else:
+					hit.collider.set_meta("health", health)
 			shots.remove_at(i)
 		elif shot.position.x > 29:
 			shots.remove_at(i)
 	enemies = enemies.filter(func(enemy): return not enemy.is_queued_for_deletion())
 	for i in range(shots.size()):
-		projectile_mesh.multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY, shots[i].position))
+		var shot: Dictionary = shots[i]
+		projectile_mesh.multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(shot["scale"]), shot["position"]))
 	projectile_mesh.multimesh.visible_instance_count = shots.size()
 	var offset := fposmod(elapsed * 0.35, FIELD.x * 2)
 	var tile_index := int(offset / FIELD.x)
@@ -281,4 +313,4 @@ func _physics_process(delta: float) -> void:
 	for i in range(scenery.size()):
 		var depth := i % 3
 		scenery[i].position.x = fposmod(i * 9.7 - elapsed * [0.875, 3.5, 8.5][depth], 64) - 32
-	status.text = "ENGINE PREVIEW | %s | %s | SCORE %d\nWASD / left stick · LMB / RT fire · T tether %s · Tab sector · Esc quit" % [BACKDROPS[sector].to_upper(), "RTX (no denoiser)" if rtx_active else "RASTER", score, "ON" if tethered else "OFF"]
+	status.text = "ENGINE PREVIEW | %s | %s | %s | SCORE %d\nWASD / left stick · LMB / RT fire · 1-5 weapon · T tether %s · Tab sector · Esc quit" % [BACKDROPS[sector].to_upper(), "RTX (no denoiser)" if rtx_active else "RASTER", WEAPONS[weapon_mode]["name"], score, "ON" if tethered else "OFF"]
