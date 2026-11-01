@@ -164,7 +164,7 @@ func make_body(texture: String, dimensions: Vector2, model: PackedScene = null, 
 	body.add_child(collision)
 	var visual := VisualSlot.new()
 	visual.name = "VisualSlot"
-	visual.configure(art(texture), dimensions, model, mirror)
+	visual.configure(art(texture), dimensions, model, mirror, true)
 	body.add_child(visual)
 	add_child(body)
 	return body

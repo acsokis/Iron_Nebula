@@ -2,6 +2,15 @@
 
 A projekthez tartozó kiadástörténet 2026. október 28-i állapot szerint. A felsorolt Alpha változatok a fejlesztés történeti mérföldkövei; a csomag a **0.9.11.2** állapotot reprezentálja. A fejlesztések funkcionális összefoglalói alapján készült, nem külön-külön Git-commitból rekonstruált történet.
 
+## Godot engine preview iteration
+
+- Add five selectable primary weapons with distinct firing cadence, spread,
+  damage and projectile scale while keeping projectile storage bounded.
+- Add alpha-matched metallic backing frames beneath textured player/enemy hulls;
+  imported 3D models replace both sprite layers.
+- Cover weapon patterns, pool limits, hull-frame alignment and model replacement
+  in the Godot headless smoke test.
+
 ## Browser 0.9.14 - Endless Orbit / native visual assets
 
 - Correct enemy and background mirroring using texture coordinates; use sharper

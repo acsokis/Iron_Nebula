@@ -28,7 +28,7 @@ Headless checks validate scene/script/physics behavior; they do not validate GPU
 ## What this preview implements
 
 - Fixed narrow-perspective 3D camera framing an XY flight plane; Jolt 3D character bodies and swept physics queries for projectile hits. Perspective is required by the tested NVIDIA path tracer; flight remains planar.
-- A replaceable `VisualSlot` child on each body. Set the arena's `ship_model` to an imported GLB/glTF scene; flight, collision and muzzle nodes remain independent of the visual model.
+- A replaceable `VisualSlot` child on each body. Textured ships/enemies use an alpha-matched metallic backing frame beneath the hull; imported GLB/glTF models replace both sprite layers. Flight, collision and muzzle nodes remain independent of the visual model.
 - Shared original textures loaded directly from `Web/public/assets`. Three generated space plates scroll without mirroring. Browser/native use an edge overlap; Godot uses opaque emission-mapped periodic planes compatible with the path tracer. Scenery, physical wrecks, asteroids and a modular station occupy separate depth layers.
 - A separately seeded, bounded procedural physical field with zero-gravity Jolt rigid bodies, CCD, full-volume spawn checks and destructible near-field asteroids/wrecks. Capsule-based flight navigation checks complete swept corridors and waits when blocked; players exclude one another from collision masks.
 - WASD/left-stick flight, mouse/RT fire, five selectable primary weapons (`1`-`5`) with distinct cadence, damage, spread and projectile scale, default tethered mouse following, bounded GPU-instanced projectiles, enemy spawning and hit scoring. `T` toggles tethering, `Tab` previews the next sector, `Esc` exits.

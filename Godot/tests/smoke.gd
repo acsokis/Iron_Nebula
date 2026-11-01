@@ -1,11 +1,13 @@
 extends SceneTree
 
 var failures: Array[String] = []
+var check_count := 0
 
 func _initialize() -> void:
 	call_deferred("run_checks")
 
 func check(condition: bool, message: String) -> void:
+	check_count += 1
 	if not condition:
 		failures.append(message)
 		push_error(message)
@@ -27,6 +29,15 @@ func run_checks() -> void:
 	await process_frame
 	check(arena.pilot is CharacterBody3D, "Flight uses a real 3D physics body")
 	check(arena.pilot.has_node("VisualSlot"), "Visual model stays separate from collision")
+	var pilot_slot = arena.pilot.get_node("VisualSlot")
+	check(pilot_slot.has_node("MetallicFrame"), "Pilot hull has a texture-masked metallic frame")
+	if pilot_slot.has_node("MetallicFrame"):
+		var frame := pilot_slot.get_node("MetallicFrame") as MeshInstance3D
+		var frame_material := frame.material_override as StandardMaterial3D
+		var hull := pilot_slot.get_node("HullSprite") as MeshInstance3D
+		var frame_mesh := frame.mesh as QuadMesh
+		check(frame.position.z < hull.position.z and frame_material.metallic > 0.9, "Metallic frame sits behind the hull with a reflective finish")
+		check(frame_material.albedo_texture == arena.art("ship") and frame_mesh.size.is_equal_approx(Vector2(7.1, 2.68) * 1.08), "Metallic backing follows the hull texture and silhouette")
 	check(arena.WEAPONS.size() == 5, "All five primary weapon modes are available")
 	for mode in range(arena.WEAPONS.size()):
 		arena.select_weapon(mode)
@@ -73,6 +84,7 @@ func run_checks() -> void:
 	friend.queue_free()
 	check(not arena.enemies.is_empty(), "Enemy spawn creates a physics target")
 	if not arena.enemies.is_empty():
+		check(arena.enemies[0].get_node("VisualSlot").has_node("MetallicFrame"), "Enemy hull uses the matching metallic frame")
 		arena.enemies[0].position = arena.pilot.position + Vector3(8, 0, 0)
 	key(KEY_SPACE, true)
 	for i in range(150):
@@ -95,6 +107,7 @@ func run_checks() -> void:
 	slot.configure(arena.art("ship"), Vector2.ONE, packed)
 	await process_frame
 	check(slot.has_node("ImportedModel"), "A model scene replaces the sprite without replacing the pilot body")
+	check(not slot.has_node("MetallicFrame"), "Imported 3D ship models do not receive a sprite frame")
 	check(arena.pilot.has_node("Muzzle"), "Weapon mount survives visual replacement")
 	key(KEY_D, true)
 	for i in range(150):
@@ -103,7 +116,9 @@ func run_checks() -> void:
 	check(arena.pilot.position.x < 23, "Solid world boundaries stop the pilot without transform clamping")
 	check(not arena.spawn_is_clear(arena.pilot.position, Vector2(7.1, 2.68)), "Spawner rejects occupied full-body volume")
 	if failures.is_empty():
-		print("PASS: Godot XY flight, physics hits, GPU batch bounds, three sector tiles and replaceable visual model")
+		print("PASS: %d Godot checks (five weapons, metallic hull frames, physics hits, GPU bounds and model replacement)" % check_count)
+	else:
+		printerr("FAIL: %d of %d Godot checks failed" % [failures.size(), check_count])
 	arena.queue_free()
 	await process_frame
 	quit(0 if failures.is_empty() else 1)
