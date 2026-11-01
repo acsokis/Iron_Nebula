@@ -20,7 +20,7 @@ test('GI, lighting, HDR fallback and audio settings are real controls',async({pa
 });
 test('controller hints switch between Xbox, DualSense and keyboard on actual input',async({page})=>{
   await page.addInitScript(()=>{window.testPad=null;Object.defineProperty(navigator,'getGamepads',{value:()=>window.testPad?[window.testPad]:[]});});
-  await boot(page);
+  await boot(page,'&render=off');
   await page.evaluate(()=>window.testPad={id:'Xbox Wireless Controller',index:0,connected:true,axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,value:0}))});
   await expect(page.locator('body')).toHaveAttribute('data-profile','xbox');
   await expect(page.locator('#solo [data-button="A"]')).toBeVisible();

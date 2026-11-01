@@ -11,7 +11,7 @@ test('production artifact enforces CSP and has no development mutation API',asyn
 });
 test('a held confirm on controller connection cannot accidentally launch a run',async({page})=>{
   await page.addInitScript(()=>{window.testPad=null;window.padPolls=0;Object.defineProperty(navigator,'getGamepads',{value:()=>{window.padPolls++;return window.testPad?[window.testPad]:[];}});});
-  await page.goto('/?test=1');await expect(page.locator('#loading')).toBeHidden({timeout:30000});
+  await page.goto('/?test=1&render=off');await expect(page.locator('#loading')).toBeHidden({timeout:30000});
   await page.evaluate(()=>{window.testPad={id:'Xbox controller',index:0,connected:true,axes:[0,0,0,0],buttons:Array.from({length:17},(_,i)=>({pressed:i===0,value:i===0?1:0}))};});
   await expect(page.locator('body')).toHaveAttribute('data-profile','xbox');await page.waitForTimeout(150);await expect(page.locator('#menu')).toBeVisible();
   const releasedAt=await page.evaluate(()=>{window.testPad.buttons[0]={pressed:false,value:0};return window.padPolls;});

@@ -196,6 +196,8 @@ async function boot(){
     renderFrame:()=>renderer.render(world,myId),version:'dev-only'};
   function simulationTick(){
     const now=performance.now(),dt=Math.min(.1,(now-previousSimulation)/1000);previousSimulation=now;phone.tick();
+    const menuActive=!!overlay||world.phase==='shop'||['gameover','victory'].includes(world.phase);
+    for(const name of input.poll(menuActive))action(name);
     const blocked=document.hidden||!input.active||!!overlay||document.activeElement?.tagName==='INPUT'||document.activeElement?.tagName==='TEXTAREA';
     let local=input.read(world,myId,blocked,ready);
     if(qa&&scriptedInput)local={...neutralInput(local.seq),...scriptedInput,seq:local.seq,ready:scriptedInput.ready??ready};
@@ -210,8 +212,7 @@ async function boot(){
   }
   const simulationTimer=setInterval(simulationTick,16);
   function loop(now){
-    const dt=Math.min(.05,(now-previousTime)/1000);previousTime=now;const menuActive=!!overlay||world.phase==='shop'||['gameover','victory'].includes(world.phase);
-    for(const name of input.poll(menuActive))action(name);
+    const dt=Math.min(.05,(now-previousTime)/1000);previousTime=now;
     let display=world;
     if(mode==='guest'&&world.phase==='playing'){
       display={...world,players:world.players.map(p=>{const old=visual.get(p.id),speed=1-Math.exp(-dt*(p.id===myId?18:12));const pos={x:old?old.x+(p.x-old.x)*speed:p.x,y:old?old.y+(p.y-old.y)*speed:p.y};visual.set(p.id,pos);return {...p,...pos};})};
