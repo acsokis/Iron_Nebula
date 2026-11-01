@@ -41,8 +41,14 @@ export class DamageVisuals{
     };
     sprite.material.customProgramCacheKey=()=>shield?'nebula-shield-spectrum-v1':'nebula-hull-voxels-v1';sprite.material.needsUpdate=true;return u;
   }
-  track(key,sprite,texture,fraction,{shield=false,hurt=0,impact=null}={}){
+  metallicFrame(key,sprite,texture){
+    const frame=this.renderer.sprite(`metallic:${key}`,texture,sprite.position.x,1080-sprite.position.y,
+      sprite.scale.x*1.075,sprite.scale.y*1.075,'#9ab0bd',-sprite.material.rotation,sprite.renderOrder-.01,sprite.material.opacity);
+    frame.center.copy(sprite.center);
+  }
+  track(key,sprite,texture,fraction,{shield=false,hurt=0,impact=null,metallic=false}={}){
     fraction=clamp(fraction);const topology=this.topology(texture),keep=voxelCount(fraction,topology.cells.length),u=this.attach(sprite,topology,shield);
+    if(metallic&&!shield)this.metallicFrame(key,sprite,texture);
     let record=this.records.get(key);
     if(!record||record.topology!==topology){record={topology,keep,spectrum:shield?new ShieldSpectrum():null,hurt,flash:0};this.records.set(key,record);}
     const changed=keep!==record.keep;
@@ -81,5 +87,10 @@ export class DamageVisuals{
       this.renderer.gpuSprites.add(`voxel:${s.texture.uuid}`,s.texture,{x:s.x+s.vx*age,y:s.y+s.vy*age+age*age*18,width:s.width,height:s.height,rotation:s.rotation+s.spin*age,opacity:Math.min(1,(s.life-age)*3),frame:s.frame,columns:s.columns,rows:s.rows,z:s.z},1200);
     }
   }
-  diagnostics(){return {backend:'GPU voxel masks and instanced fragments',fragments:this.shards.length,objects:[...this.records].map(([key,r])=>({key,total:r.topology.cells.length,remaining:r.keep,shield:!!r.spectrum,wave:r.spectrum?Math.max(...r.spectrum.field.map(Math.abs)):0}))};}
+  diagnostics(){return {backend:'GPU voxel masks and instanced fragments',fragments:this.shards.length,objects:[...this.records].map(([key,r])=>{
+    const hull=r.sprite,frame=this.renderer.pool.get(`metallic:${key}`)?.sprite;
+    return {key,total:r.topology.cells.length,remaining:r.keep,shield:!!r.spectrum,wave:r.spectrum?Math.max(...r.spectrum.field.map(Math.abs)):0,
+      metallicFrame:!!frame?.visible,frameBehind:!!frame&&frame.renderOrder<hull.renderOrder,frameUsesHullTexture:!!frame&&frame.material.map===hull.material.map,
+      frameScale:frame&&hull.scale.x?frame.scale.x/hull.scale.x:0};
+  })};}
 }
