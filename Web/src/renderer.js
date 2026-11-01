@@ -175,13 +175,13 @@ export class Renderer{
         w.sector===3?'infernoEnemy':w.sector===2?(e.kind==='heavy'?'heavy':e.kind==='scout'?'dart':'wisp'):e.kind;
       const scale=e.kind==='boss'?(w.sector===1?(e.bossType===1?.83:1)*.82:w.sector===2?(e.bossType===1?.48:.54):.5):w.sector===1?({heavy:.5,interceptor:.42,scout:.41}[e.kind])*.82:w.sector===2?.32*.82:.62*.82;
       const sprite=this.native(`enemy${e.id}`,texture,e.x,e.y,scale,'#ffffff',Math.sin(e.age)*.025,2,['scout','interceptor','heavy','warden'].includes(texture));
-      this.damageVisuals.track(`enemy${e.id}`,sprite,sprite.material.map,e.health/e.maxHealth);
+      this.damageVisuals.track(`enemy${e.id}`,sprite,sprite.material.map,e.health/e.maxHealth,{metallic:true});
     }
     for(const p of w.players){if(p.lives<=0)continue;
       const roll=p.vy/550*.08,scale=.26*.82,plume=this.manifest.assets.plume;
       this.native(`engine${p.id}`,'plume',p.x-150*.82,p.y+2*.82,(.34+.02*Math.sin(w.time*12))*.82,'#ffffff',roll,2,false,.74,[plume.sourceWidth*.92,plume.sourceHeight*.5]);
       const hull=this.native(`player${p.id}`,'ship',p.x,p.y,scale,p.id===localId?'#ffffff':COLORS[p.id],roll,4,false,1,[690,292]);
-      this.damageVisuals.track(`player${p.id}`,hull,this.textures.ship,p.health/p.maxHealth);
+      this.damageVisuals.track(`player${p.id}`,hull,this.textures.ship,p.health/p.maxHealth,{metallic:true});
       const impact=w.fx.findLast(f=>f.type==='impact'&&Math.hypot(f.x-p.x,f.y-p.y)<180);
       this.damageVisuals.shield(`shield${p.id}`,hull,p.shield/Math.max(1,p.maxShield),p.hurt,impact);
       if(p.drone||w.upgrades.drone)this.native(`drone${p.id}`,'drone',p.x-75,p.y-65,.43*.82,'#ffffff',0,4);
