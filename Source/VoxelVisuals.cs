@@ -92,10 +92,10 @@ internal sealed class VoxelVisuals : IDisposable
         }
         if(_shards.Count>1200)_shards.RemoveRange(0,_shards.Count-1200);
     }
-    public void End(SpriteBatch batch)
+    public void End(SpriteBatch batch,bool emitMissing=true)
     {
         foreach(var key in _bodies.Where(p=>p.Value.Frame!=_frame).Select(p=>p.Key).ToArray())
-        {var body=_bodies[key];if(body.Position.X>-100&&body.Position.X<2050)Break(body,0,body.Keep);_bodies.Remove(key);}
+        {var body=_bodies[key];if(emitMissing&&body.Position.X>-100&&body.Position.X<2050)Break(body,0,body.Keep);_bodies.Remove(key);}
         _shards.RemoveAll(s=>_time-s.Born>=s.Life);
         foreach(var s in _shards)
         {

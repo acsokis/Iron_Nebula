@@ -3100,7 +3100,7 @@ private void DrawShop()
             _batch.Begin(blendState:BlendState.AlphaBlend,samplerState:SamplerState.LinearClamp,transformMatrix:Matrix.CreateTranslation(jitter.X,jitter.Y,0));
             DrawActors();
             DrawCoopOtherPilots();
-            _voxelVisuals.End(_batch);
+            _voxelVisuals.End(_batch,_mode is GameMode.Playing or GameMode.Paused);
             _batch.End();
             _batch.Begin(blendState:BlendState.Additive,samplerState:SamplerState.LinearClamp,transformMatrix:Matrix.CreateTranslation(jitter.X,jitter.Y,0));
             DrawLights();

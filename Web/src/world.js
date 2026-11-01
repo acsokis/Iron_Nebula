@@ -141,7 +141,7 @@ export function stepWorld(w,inputs,dt=1/60){
   if(w.waveTimer<=0&&w.enemies.length<22&&!w.enemies.some(e=>e.kind==='boss'&&e.health>0)){
     w.wave++;for(let i=0;i<Math.min(5,2+Math.floor(w.sectorTime/25));i++)spawnEnemy(w);w.waveTimer=Math.max(1.3,3.4-.2*w.sector);
   }
-  w.spaceSeed??=(w.rng^0x50ace123)>>>0;w.spaceIndex??=0;w.spaceClock=(w.spaceClock??2)-dt;
+  w.spaceSeed??=(w.rng^0x50ace123)>>>0;w.spaceIndex??=0;w.spaceClock=Math.max(0,(w.spaceClock??2)-dt);
   if(w.spaceClock<=0&&w.rocks.length<24){const encounter=spaceEncounter(w.spaceSeed,w.spaceIndex++),rock={id:w.nextId++,x:2180,...encounter,health:encounter.maxHealth};
     if(reserveSpawn({...rock,type:'rock',half:0},solidBodies(w))){w.rocks.push(rock);w.spaceClock=encounter.delay;}else w.spaceClock=.4;}
   for(const e of w.enemies){
