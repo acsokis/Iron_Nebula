@@ -40,7 +40,7 @@ A saját fejlesztésű, vízszintesen scrollozó sci-fi shoot ’em up játék. 
 1. Telepítsd a **.NET 8 SDK-t**.
 2. A teljes forrásprojekt gyökeréből futtasd a `BUILD_WINDOWS.bat` fájlt.
 3. Kiadáshoz használd a `PUBLISH_WINDOWS.bat` parancsfájlt. Ez a self-contained x64 mappakiadást a `dist/IronNebula-win-x64/` alá teszi, ellenőrzi a szükséges képeket, SHA-256 ellenőrzőösszeget ír, és nem indítja el automatikusan a játékot. Az EXE, a függőségei és az `Assets/` együtt maradjanak.
-4. A teljes runtime-képanyag és a hanghatások az `Assets/` alatt legyenek. A jogtisztasága nem igazolt, felhasználó által biztosított `Propulsive Peak` hangsávot a Windows kiadási csomag nem tartalmazza; a játék nélküle is elindul.
+4. A teljes runtime-képanyag és a hanganyag az `Assets/` alatt legyen. Az eredeti fejlesztő megerősítette a `Propulsive Peak` terjesztési engedélyét; az MP3 és a streamelt WAV is bekerül a Windows kiadási csomagba.
 
 A projekt Windowsra készült; a fő projektfájl: `IronNebula.csproj`. A MonoGame-csomag a projektben rögzített verzióval áll vissza.
 
@@ -76,7 +76,7 @@ DEVELOPMENT_HISTORY.md teljes fejlesztési idővonal
 
 ## Fontos megjegyzés a zenei jogokról
 
-A *Propulsive Peak* felhasználó által biztosított asztali hangsáv. A webes kiadás a felhasználó kifejezett kérésére tartalmazza, rögzített SHA256-ellenőrzéssel. A zeneszerző és a harmadik féltől származó licenc nem lett függetlenül igazolva; a projekthez nem társítunk kitalált Creative Commons vagy royalty-free engedélyt.
+A *Propulsive Peak* asztali hangsáv terjesztését az eredeti fejlesztő engedélyezte. A Windows csomag tartalmazza az MP3-forrást és a streamelt WAV-változatot.
 
 ## Dokumentáció
 

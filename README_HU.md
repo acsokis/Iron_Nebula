@@ -12,8 +12,8 @@ kooperatív módot tartalmaz.
   `Assets/` mappa együtt szükségesek.
 - A publikálás ellenőrzi a kötelező artwork fájlokat, SHA-256 ellenőrzőösszeget
   készít az EXE-ről, és nem indítja el automatikusan a játékot.
-- A felhasználó által adott, terjesztési joggal nem igazolt
-  `Propulsive Peak` hangsáv nem kerül a Windows kiadási csomagba.
+- Az eredeti fejlesztő megerősítette a `Propulsive Peak` terjesztési engedélyét;
+  az MP3 és a streamelt WAV is része a Windows kiadásnak.
 
 ## Automatizált ellenőrzések
 

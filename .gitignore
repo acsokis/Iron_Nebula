@@ -8,6 +8,3 @@ dist/
 .engine/
 .godot/
 *.import
-# The soundtrack was user-supplied; do not publish without confirming distribution rights.
-Assets/Audio/Propulsive Peak.mp3
-Assets/Audio/Propulsive Peak_stream.wav

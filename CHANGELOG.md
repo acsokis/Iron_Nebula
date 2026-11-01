@@ -2,6 +2,14 @@
 
 A projekthez tartozó kiadástörténet 2026. október 28-i állapot szerint. A felsorolt Alpha változatok a fejlesztés történeti mérföldkövei; a csomag a **0.9.11.2** állapotot reprezentálja. A fejlesztések funkcionális összefoglalói alapján készült, nem külön-külön Git-commitból rekonstruált történet.
 
+## Windows desktop release hardening
+
+- Publish a self-contained Windows x64 folder with its complete runtime artwork
+  and sound assets; include the developer-authorized Propulsive Peak MP3/WAV.
+- Verify required artwork and soundtrack files, and write an executable SHA-256
+  checksum without automatically launching the game.
+- Preserve the full asset set needed by the native release.
+
 ## Browser 0.9.14 - Endless Orbit / native visual assets
 
 - Correct enemy and background mirroring using texture coordinates; use sharper

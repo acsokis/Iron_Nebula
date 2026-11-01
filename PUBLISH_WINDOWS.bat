@@ -17,6 +17,10 @@ if not exist "Assets\ui_atlas.png" (
  echo Restore the complete Assets folder before publishing.
  exit /b 1
 )
+if not exist "Assets\Audio\Propulsive Peak_stream.wav" (
+ echo ERROR: Required licensed soundtrack is missing: Assets\Audio\Propulsive Peak_stream.wav
+ exit /b 1
+)
 echo [1/2] NuGet restore...
 dotnet restore IronNebula.csproj --force -r win-x64 --verbosity minimal
 if errorlevel 1 goto :failed
@@ -37,12 +41,12 @@ if not exist "%OUTPUT%\Assets\ui_atlas.png" (
  echo ERROR: Required published UI artwork is missing.
  goto :failed
 )
-if exist "%OUTPUT%\Assets\Audio\Propulsive Peak.mp3" (
- echo ERROR: The unlicensed user-supplied soundtrack must not be published.
+if not exist "%OUTPUT%\Assets\Audio\Propulsive Peak_stream.wav" (
+ echo ERROR: The licensed soundtrack is missing from the publish output.
  goto :failed
 )
-if exist "%OUTPUT%\Assets\Audio\Propulsive Peak_stream.wav" (
- echo ERROR: The unlicensed user-supplied soundtrack must not be published.
+if not exist "%OUTPUT%\Assets\Audio\Propulsive Peak.mp3" (
+ echo ERROR: The licensed soundtrack source is missing from the publish output.
  goto :failed
 )
 powershell -NoProfile -Command "(Get-FileHash -LiteralPath '%OUTPUT%\IronNebula.exe' -Algorithm SHA256).Hash" > "%OUTPUT%\IronNebula.exe.sha256"
